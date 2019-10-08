@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="Heml Editor"
+            class="hemleditor2.editors.HemlEditor"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="heml"
             icon="icons/sample.gif"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            class="hemleditor2.editors.HemlEditor"
-            id="hemleditor2.editors.HemlEditor">
+            id="hemleditor2.editors.HemlEditor"
+            name="Heml Editor">
       </editor>
+      <editorContentTypeBinding
+            contentTypeId="hemleditor2.project"
+            editorId="org.eclipse.ui.genericeditor.GenericEditor">
+      </editorContentTypeBinding>
    </extension>
-
 </plugin>

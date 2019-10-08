@@ -31,9 +31,9 @@ public class HemlReconciler extends PresentationReconciler {
         RuleBasedScanner scanner= new RuleBasedScanner();
         IRule[] rules = {
             new EndOfLineRule("%%", new Token(commentAttribute)),
-            new SingleLineRule("{i", "}", new Token(italicAttribute)),
-            new SingleLineRule("{kw", "}", new Token(kwAttribute)),
-            new SingleLineRule("{em", "}", new Token(emAttribute)),
+            new SingleLineRule("{i ", "}", new Token(italicAttribute)),
+            new SingleLineRule("{kw ", "}", new Token(kwAttribute)),
+            new SingleLineRule("{em ", "}", new Token(emAttribute)),
             new SingleLineRule("{", " ", new Token(tagAttribute)),
             new SingleLineRule("%", "=", new Token(parameterAttribute)),
             new SingleLineRule("}", " ", new Token(tagAttribute), '\\', true)

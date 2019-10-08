@@ -3,9 +3,14 @@ Bundle-ManifestVersion: 2
 Bundle-Name: HemlEditor2
 Bundle-SymbolicName: HemlEditor2;singleton:=true
 Bundle-Version: 1.0.0
-Bundle-Vendor: ArianeGroup
+Bundle-Vendor: fredncie
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.jface.text,
- org.eclipse.ui.editors
+ org.eclipse.ui.editors,
+ org.eclipse.ui.genericeditor,
+ org.eclipse.core.filebuffers,
+ org.eclipse.core.resources,
+ org.eclipse.ui.views;bundle-version="3.9.100"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: hemleditor2.editors

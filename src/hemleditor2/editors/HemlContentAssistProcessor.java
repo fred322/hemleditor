@@ -43,8 +43,7 @@ public class HemlContentAssistProcessor implements IContentAssistProcessor {
 	private static final String ASSERT = "assert";
 	private static final String NOTE = "note";
 	private static final String FIGURE = "fig";
-	
-	
+		
     private static final Map<String, String[]> MAP_PARAMS = new HashMap<>();
     private static final Map<String, String[]> MAP_TAGS = new HashMap<>();
     private static final Set<String> INLINE_TAGS = new HashSet<>();
@@ -158,8 +157,7 @@ public class HemlContentAssistProcessor implements IContentAssistProcessor {
     private ICompletionProposal createCompletionProposal(String tag, int tagOffset, int offset, String indentation) {
     	// String left = tag.substring(tagOffset);
     	String toShow = "{" + tag + " ";
-    	if (!INLINE_TAGS.contains(tag))
-    		toShow += "\n" + indentation;
+    	if (!INLINE_TAGS.contains(tag)) toShow += "\n" + indentation;
     	toShow += "}";
     	return new CompletionProposal(toShow, offset - tagOffset - 1, tagOffset + 1, tag.length() + 2);
     }
@@ -178,30 +176,19 @@ public class HemlContentAssistProcessor implements IContentAssistProcessor {
     		String toAnalyze = text.substring(0, offset);
     		int currentIdx = toAnalyze.length() - 1;
     		for (; currentIdx >= 0; currentIdx--) {
-    			if (toAnalyze.charAt(currentIdx) == '}')
-    				bracketNum++;
+    			if (toAnalyze.charAt(currentIdx) == '}') bracketNum++;
     			else if (toAnalyze.charAt(currentIdx) == '{') {
-    				if (bracketNum == 0)
-    					break;
-    				else
-    					bracketNum--;	
+    				if (bracketNum == 0) break;
+    				else bracketNum--;	
     			}
     		}
     		
     		if (currentIdx >= 0) {
     			int space = text.indexOf(" ", currentIdx);
-    			if (space != -1) 
-    			{
+    			if (space != -1) {
     				ret = text.substring(currentIdx + 1, space);
     			}
     		}
-    		/*
-        	String noBrackets = "[^\\{\\}]*"; 
-        	Pattern pattern = Pattern.compile("\\{([^\\s]+)" + noBrackets + "(?:" + noBrackets + "\\{" + noBrackets + "\\})*" + noBrackets + "$");
-        	Matcher matcher = pattern.matcher(text.substring(0, offset));
-        	if (matcher.find()) {
-        		ret = matcher.group(1);
-        	}    		*/
     	}
     	return ret;
     }
