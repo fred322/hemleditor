@@ -5,27 +5,35 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jface.text.IDocument;
+
 public class HemlElement {
+	private static final Pattern QualifierPattern = Pattern.compile("\\{([^\\s\n]+)");
+	private static final Pattern TitlePattern = Pattern.compile("%title=([^%\n}]+)");
 	private HemlElement fParent;
 	private String fText;
 	private String fQualifier;
 	private String fTitle;
+	private long fStartIndex;
 	private HemlElement[] fChildren;
 
-	private HemlElement(String texte, HemlElement parent) {
+	private HemlElement(String texte, HemlElement parent, long offset) {
 		fText = texte.trim();
 		fParent = parent;
+		fStartIndex = offset;
 
-		fQualifier = fText.substring(1, fText.indexOf(' '));
+		Matcher matcherQualifier = QualifierPattern.matcher(texte);
+		if (matcherQualifier.find()) {
+			fQualifier = matcherQualifier.group(1);			
+		}
 		int currentOffset = 1;
 		List<HemlElement> children = new ArrayList<>();
 		int offsetClose = -1;
 		int offsetOpen = -1;
 		String beforeFirstChild = fText;
 		offsetOpen = fText.indexOf('{', currentOffset);
-		if (offsetOpen != -1) beforeFirstChild.substring(0, offsetOpen);
-		Pattern pattern = Pattern.compile("%title=([^%\n}]+)");
-		Matcher matcher = pattern.matcher(beforeFirstChild);
+		if (offsetOpen != -1) beforeFirstChild = beforeFirstChild.substring(0, offsetOpen);
+		Matcher matcher = TitlePattern.matcher(beforeFirstChild);
 		if (matcher.find()) {
 			fTitle = matcher.group(1).trim();
 		}
@@ -34,9 +42,11 @@ public class HemlElement {
 			offsetClose = fText.indexOf('}', currentOffset);
 			offsetOpen = fText.indexOf('{', currentOffset);
 			if (offsetOpen != -1 && offsetOpen < offsetClose) { //there is a child
-				HemlElement newChild = HemlElement.create(fText.substring(offsetOpen), this);
+				HemlElement newChild = HemlElement.create(fText.substring(offsetOpen), this, offset + offsetOpen);
 				if (newChild != null) {
-					children.add(newChild);
+					if (newChild.getQualifier().length() >= 4) {
+						children.add(newChild);						
+					}
 					currentOffset = offsetOpen + newChild.getText().length();
 				}
 				else {
@@ -49,9 +59,26 @@ public class HemlElement {
 		}
 		fChildren = children.stream().toArray(HemlElement[]::new);
 	}
+	public static HemlElement create(IDocument document) {
+		return create(document.get(), null, 0);
+	}
+	public static HemlElement create(String texte) {
+		return create(texte, null, 0);
+	}
+	public static HemlElement create(String texte, HemlElement parent, long offset) {
+		return texte.startsWith("{") && texte.indexOf(' ') > 2 ? new HemlElement(texte, parent, offset) : null;
+	}
 	
-	public static HemlElement create(String texte, HemlElement parent) {
-		return texte.startsWith("{") && texte.indexOf(' ') > 2 ? new HemlElement(texte, parent) : null;
+	public HemlElement getChild(long offset) {
+		HemlElement ret = null;
+		if (offset >= this.fStartIndex && offset < this.fStartIndex + this.getTextLength()) {
+			for (HemlElement child : fChildren) {
+				ret = child.getChild(offset);
+				if (ret != null) break;
+			}
+			if (ret == null) ret = this;			
+		}
+		return ret;
 	}
 	
 	public String getQualifier() { return fQualifier; }
@@ -63,4 +90,6 @@ public class HemlElement {
 	public String getText() { return fText; }
 	public HemlElement getParent() { return fParent; }
 	public HemlElement[] getChildren() { return fChildren; }
+	public long getOffset() { return fStartIndex; }
+	public long getTextLength() { return fText.length(); }
 }

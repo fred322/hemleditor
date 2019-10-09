@@ -1,5 +1,8 @@
 package hemleditor2.editors;
 
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -22,9 +25,21 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 		if (IContentOutlinePage.class.equals(adapter)) {
 			if (fOutlinePage == null) fOutlinePage = new HemlContentOutlinePage();
 			IEditorInput input = this.getEditorInput();
-			String content = this.getDocumentProvider().getDocument(input).get();
-			fOutlinePage.setInput(HemlElement.create(content, null));
+			IDocument document = this.getDocumentProvider().getDocument(input);
+			fOutlinePage.setInput(HemlElement.create(document.get()));
+			document.addDocumentListener(new IDocumentListener() {
+				@Override
+				public void documentChanged(DocumentEvent arg0) {
+					fOutlinePage.setInput(HemlElement.create(document.get()));
+				}
+				
+				@Override
+				public void documentAboutToBeChanged(DocumentEvent arg0) {					
+				}
+			});
 			fOutlinePage.addSelectionChangedListener(this);
+			this.getSelectionProvider().addSelectionChangedListener(fOutlinePage);
+			
 			return (T) fOutlinePage;
 		}
 		return super.getAdapter(adapter);
@@ -32,11 +47,11 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 
 	@Override
 	public void selectionChanged(SelectionChangedEvent arg0) {
-		System.out.println("Selection changed!");
 		if (arg0.getSelection() instanceof TreeSelection) {
 			Object element = ((TreeSelection) arg0.getSelection()).getFirstElement();
 			if (element instanceof HemlElement) {
-				System.out.println("Selected: " + ((HemlElement) element).getLabel());
+				HemlElement hemlElement = (HemlElement) element;
+				this.selectAndReveal((int)hemlElement.getOffset(), 1);
 			}
 		}
 	}

@@ -1,13 +1,8 @@
 package hemleditor2.editors;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 
 public class HemlTreeContentProvider implements ITreeContentProvider, ILabelProvider {
