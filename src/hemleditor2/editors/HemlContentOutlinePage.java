@@ -1,12 +1,11 @@
 package hemleditor2.editors;
 
 import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 public class HemlContentOutlinePage extends ContentOutlinePage {
@@ -19,7 +18,12 @@ public class HemlContentOutlinePage extends ContentOutlinePage {
 
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
-			viewer.setInput(fInput);
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					viewer.setInput(fInput);					
+				}
+			});
 		}
 	}
 	
