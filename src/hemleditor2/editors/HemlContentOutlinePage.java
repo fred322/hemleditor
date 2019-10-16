@@ -15,7 +15,10 @@ public class HemlContentOutlinePage extends ContentOutlinePage {
 	
 	public void setInput(HemlElement input) {
 		this.fInput = input;
-
+		refresh();
+	}
+	
+	public void refresh() {
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
 			Display.getDefault().asyncExec(new Runnable() {

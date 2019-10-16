@@ -30,6 +30,7 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 	private HemlContentOutlinePage fOutlinePage;
 	private ProjectionAnnotationModel fAnnotationModel;
 	private Annotation[] fCurrentAnnotations;
+	private HemlElement fMainHemlElement;
 	
 	public HemlEditor() {
 		super();
@@ -99,9 +100,15 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 	
 	
 	private void updateHelpers(IDocument document) {
-		HemlElement mainHeml = HemlElement.create(document.get());
-		fOutlinePage.setInput(mainHeml);
-		updateFoldingStructure(mainHeml);
+		if (fMainHemlElement == null) {
+			fMainHemlElement = HemlElement.create(document.get());
+			fOutlinePage.setInput(fMainHemlElement);
+		}
+		else {
+			fMainHemlElement.update(document.get());
+			fOutlinePage.refresh();
+		}
+		updateFoldingStructure(fMainHemlElement);
 	}
 	private void updateFoldingStructure(HemlElement mainHeml) {
 		if (mainHeml != null) {

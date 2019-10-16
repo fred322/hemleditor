@@ -1,16 +1,17 @@
 package hemleditor2.editors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 
 public class HemlElement {
-	private static final Pattern QualifierPattern = Pattern.compile("\\{([^\\s\n]+)");
-	private static final Pattern TitlePattern = Pattern.compile("%title=([^%\n}]+)");
+	private static final Pattern QualifierPattern = Pattern.compile("(?:^|\\n)[\\s\\t]*\\{([^\\s\\n]+)([^\\n]+%title=([^%\\n}]+))?");
+	private static final Pattern EndBlockPattern = Pattern.compile("}[\\s\\t]*[\\n$]");
 	private HemlElement fParent;
 	private String fText;
 	private String fQualifier;
@@ -19,56 +20,10 @@ public class HemlElement {
 	private HemlElement[] fChildren;
 
 	private HemlElement(String texte, HemlElement parent, long offset) {
-		fText = texte.trim();
 		fParent = parent;
-		fStartIndex = offset;
-
-		Matcher matcherQualifier = QualifierPattern.matcher(texte);
-		if (matcherQualifier.find()) {
-			fQualifier = matcherQualifier.group(1);			
-		}
-		int currentOffset = 1;
-		List<HemlElement> children = new ArrayList<>();
-		int offsetClose = -1;
-		int offsetOpen = -1;
-		String beforeFirstChild = fText;
-		offsetOpen = fText.indexOf('{', currentOffset);
-		if (offsetOpen != -1) beforeFirstChild = beforeFirstChild.substring(0, offsetOpen);
-		Matcher matcher = TitlePattern.matcher(beforeFirstChild);
-		if (matcher.find()) {
-			fTitle = matcher.group(1).trim();
-		}
-		
-		do {
-			offsetClose = fText.indexOf('}', currentOffset);
-			offsetOpen = fText.indexOf('{', currentOffset);
-			if (offsetOpen != -1 && offsetOpen < offsetClose) { //there is a child
-				HemlElement newChild = HemlElement.create(fText.substring(offsetOpen), this, offset + offsetOpen);
-				if (newChild != null) {
-					if (newChild.getQualifier().length() >= 4) {
-						children.add(newChild);						
-					}
-					currentOffset = offsetOpen + newChild.getText().length();
-				}
-				else {
-					currentOffset = offsetClose + 1;
-				}
-			}			
-		} while(offsetOpen != -1 && offsetClose != -1 && offsetOpen < offsetClose && currentOffset < fText.length());
-		if (offsetClose != -1) {
-			fText = fText.substring(0, offsetClose + 1);
-		}
-		fChildren = children.stream().toArray(HemlElement[]::new);
+		update(texte, offset);
 	}
 	
-	/**
-	 * Create a {@link HemlElement} from the given document.
-	 * @param document the document
-	 * @return the created {@link HemlElement} or null if no element.
-	 */
-	public static HemlElement create(IDocument document) {
-		return create(document.get(), null, 0);
-	}
 	/**
 	 * Create a {@link HemlElement} from the root of the texte.
 	 * @param texte the texte
@@ -85,9 +40,68 @@ public class HemlElement {
 	 * @return the created {@link HemlElement} or null if no element in given texte.
 	 */
 	public static HemlElement create(String texte, HemlElement parent, long offset) {
-		return texte.startsWith("{") && texte.indexOf(' ') > 2 ? new HemlElement(texte, parent, offset) : null;
+		return new HemlElement(texte, parent, offset);
 	}
 
+	/**
+	 * Update this element and all its children
+	 * @param texte the new texte.
+	 * @return true if ok.
+	 */
+	public boolean update(String texte) {
+		return update(texte, 0);
+	}
+	/**
+	 * Update this element and all its children
+	 * @param texte the new texte.
+	 * @param offset the new offset in the document.
+	 * @return true if ok.
+	 */
+	public boolean update(String texte, long offset) {
+		fText = texte.trim();
+		fStartIndex = offset;
+		
+		Matcher matcherQualifier = QualifierPattern.matcher(texte);
+		Matcher endBlockMatcher = EndBlockPattern.matcher(texte);
+		if (matcherQualifier.find()) {
+			fQualifier = matcherQualifier.group(1);
+			if (matcherQualifier.groupCount() > 2) {
+				fTitle = matcherQualifier.group(3);
+			}
+		}
+		int currentOffset = matcherQualifier.start(1) + 1;
+		int offsetClose = -1;
+		int offsetOpen = -1;
+		
+		List<HemlElement> children = fChildren != null ? new ArrayList<>(Arrays.asList(fChildren)) : new ArrayList<>();
+		int currentIdx = 0;
+		do {
+			offsetClose = endBlockMatcher.find(currentOffset) ? endBlockMatcher.start() : -1;
+			// search next qualifier.
+			if (matcherQualifier.find(currentOffset) && (offsetOpen = matcherQualifier.start(1) - 1) < offsetClose) { //there is a child
+				HemlElement newChild = null;
+				long subOffset = offset + offsetOpen;
+				String subText = fText.substring(offsetOpen);
+				if (currentIdx < children.size()) {
+					newChild = children.get(currentIdx);
+					newChild.update(subText, subOffset);
+				}
+				else {
+					newChild = new HemlElement(subText, this, subOffset);
+					children.add(newChild);
+				}
+				currentIdx++;
+				currentOffset = offsetOpen + newChild.getText().length();
+			} else break;
+		} while(offsetClose != -1 && currentOffset < fText.length());
+		if (offsetClose != -1) {
+			fText = fText.substring(0, offsetClose + 1);
+		}
+		if (currentIdx < children.size()) children = children.subList(0, currentIdx);
+		fChildren = children.stream().toArray(HemlElement[]::new);
+		return true;
+	}
+	
 	/**
 	 * Get the child at the given offset in the document
 	 * @param offset the offset in the document
@@ -134,6 +148,11 @@ public class HemlElement {
 	 * @return the children
 	 */
 	public HemlElement[] getChildren() { return fChildren; }
+	/**
+	 * The list of children of this element
+	 * @return the children
+	 */
+	public HemlElement[] getChildren(Predicate<HemlElement> filter) { return Arrays.asList(fChildren).stream().filter(filter).toArray(HemlElement[]::new); }
 	/**
 	 * the offset of this element from the start of the document
 	 * @return the offset.
