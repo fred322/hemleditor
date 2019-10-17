@@ -4,15 +4,15 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="hemleditor2.editors.HemlEditor"
+            class="net.fredncie.hemleditor.editors.HemlEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="heml"
             icon="icons/sample.gif"
-            id="hemleditor2.editors.HemlEditor"
+            id="net.fredncie.hemleditor.editors.HemlEditor"
             name="Heml Editor">
       </editor>
       <editorContentTypeBinding
-            contentTypeId="hemleditor2.project"
+            contentTypeId="hemleditor.project"
             editorId="org.eclipse.ui.genericeditor.GenericEditor">
       </editorContentTypeBinding>
    </extension>

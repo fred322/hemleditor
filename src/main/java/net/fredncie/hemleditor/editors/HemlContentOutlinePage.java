@@ -1,4 +1,4 @@
-package hemleditor2.editors;
+package net.fredncie.hemleditor.editors;
 
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;

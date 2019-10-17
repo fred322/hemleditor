@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: HemlEditor2
-Bundle-SymbolicName: HemlEditor2;singleton:=true
+Bundle-Name: HemlEditor
+Bundle-SymbolicName: HemlEditor;singleton:=true
 Bundle-Version: 1.0.1
 Bundle-Vendor: fredncie
 Require-Bundle: org.eclipse.core.runtime,
@@ -13,4 +13,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.ui.views;bundle-version="3.9.100"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: hemleditor2.editors
+Export-Package: net.fredncie.hemleditor.editors

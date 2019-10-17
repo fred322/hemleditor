@@ -1,4 +1,4 @@
-package hemleditor2.editors;
+package net.fredncie.hemleditor.editors;
 
 import java.util.regex.Pattern;
 

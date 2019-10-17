@@ -1,4 +1,4 @@
-package hemleditor2.editors;
+package net.fredncie.hemleditor.editors;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
