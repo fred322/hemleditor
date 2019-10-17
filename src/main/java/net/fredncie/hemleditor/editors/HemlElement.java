@@ -157,6 +157,7 @@ public class HemlElement {
 			fQualifier = matcherQualifier.group(1);
 			if (matcherQualifier.groupCount() > 2) {
 				fTitle = matcherQualifier.group(3);
+				if (fTitle != null) fTitle = fTitle.trim();
 			}
 		}
 		int currentOffset = matcherQualifier.start(1) + 1;

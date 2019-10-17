@@ -35,6 +35,14 @@
                 {}
              }!}
              }
+             
+             {code %language=bash
+             {! --this is a lua code.
+             astre:open();
+             local ret = {
+                {}
+             }!}
+             }
          }
          {section %title=Nouvelle section
             {section %title=Sub Section
