@@ -36,24 +36,24 @@ public class TestHemlElement {
 		Assert.assertEquals(toto1.getLabel(), "section (Toto1)");
         Assert.assertEquals(section2.getLabel(), "section (Section 2)");
         
-        Assert.assertEquals(toto1.getChildren().length, 6);
-        Assert.assertEquals(toto1.getChildren()[0].getLabel(), "!");
+        Assert.assertEquals(toto1.getChildren().length, 7);
+        Assert.assertEquals(toto1.getChildren()[0].getLabel(), "code block");
         Assert.assertEquals(toto1.getChildren()[1].getLabel(), "em (tptp)");
-        Assert.assertEquals(toto1.getChildren()[2].getLabel(), "#");
+        Assert.assertEquals(toto1.getChildren()[2].getLabel(), "comment");
         Assert.assertEquals(toto1.getChildren()[3].getLabel(), "section (too1)");
         HemlElement caoLeGrand = toto1.getChildren()[4];
         Assert.assertEquals(caoLeGrand.getLabel(), "section (cao le grand)");
-        Assert.assertEquals(toto1.getChildren()[5].getLabel(), "section (Nouvelle section)");
+        Assert.assertEquals(toto1.getChildren()[5].getLabel(), "comment");
+        Assert.assertEquals(toto1.getChildren()[6].getLabel(), "section (Nouvelle section)");
         
         Assert.assertEquals(caoLeGrand.getChildren().length, 3);
         Assert.assertEquals(caoLeGrand.getChildren()[0].getLabel(), "section (Sub1)");
-        Assert.assertEquals(caoLeGrand.getChildren()[1].getLabel(), "code");
+        Assert.assertEquals(caoLeGrand.getChildren()[1].getLabel(), "code (lua)");
         HemlElement code2 = caoLeGrand.getChildren()[2];
-        Assert.assertEquals(code2.getLabel(), "code");
+        Assert.assertEquals(code2.getLabel(), "code (bash)");
         Assert.assertEquals(code2.getChildren().length, 1);
-        Assert.assertEquals(code2.getChildren()[0].getLabel(), "!");
-        
-        
+        Assert.assertEquals(code2.getChildren()[0].getLabel(), "code block");
+                
         Assert.assertEquals(section2.getChildren().length, 4);
         Assert.assertEquals(section2.getChildren()[0].getLabel(), "section (SubSection number 1)");
         Assert.assertEquals(section2.getChildren()[1].getLabel(), "section (SubSection number 2)");

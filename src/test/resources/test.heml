@@ -16,6 +16,9 @@
          }
          class blob {
          }
+         #{lol}
+         class naboo {}
+         
          #}
          {section %title=too1
              {section %title=It is the foo
@@ -23,7 +26,7 @@
                 pour voir ce qu'il faut avec.
              }
          }
-         {section %title=cao le grand %language=lua
+         {section %title=cao le grand
              {section %title=Sub1
                  {section %title=Sub4 }
              }
@@ -41,9 +44,9 @@
              astre:open();
              local ret = {
                 {}
-             }!}
-             }
+             }!}}
          }
+         {# un petit commentaire #}
          {section %title=Nouvelle section
             {section %title=Sub Section
             {?table
