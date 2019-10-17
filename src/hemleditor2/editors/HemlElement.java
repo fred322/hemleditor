@@ -10,8 +10,11 @@ import java.util.regex.Pattern;
 import org.eclipse.jface.text.Position;
 
 public class HemlElement {
-	private static final Pattern QualifierPattern = Pattern.compile("(?:^|\\n)[\\s\\t]*\\{([^\\s\\n]+)([^\\n]+%title=([^%\\n}]+))?");
-	private static final Pattern EndBlockPattern = Pattern.compile("}[\\s\\t]*[\\n$]");
+	private static final Pattern FirstLinePattern = Pattern.compile("^\\{?[\\s\\S]*?\\}");
+	private static final Pattern QualifierPattern = Pattern.compile("^\\s*\\{(\\S+)([^\\n]*%title=([^%}\\n]+))?[^\\n]*$", Pattern.MULTILINE);
+	private static final Pattern EndBlockPattern = Pattern.compile("^[^#\\n]*(\\})[ \t]*(?:#[^\\n]*)?$", Pattern.MULTILINE);
+	private static final Pattern PlantUmlBlockPattern = Pattern.compile("^(\\{#[^#]+#\\})");
+	private static final Pattern CodeBlockPattern = Pattern.compile("^(\\{![^!]+!\\})");
 	private HemlElement fParent;
 	private String fText;
 	private String fQualifier;
@@ -61,47 +64,15 @@ public class HemlElement {
 		fText = texte.trim();
 		fStartIndex = offset;
 		
-		Matcher matcherQualifier = QualifierPattern.matcher(texte);
-		Matcher endBlockMatcher = EndBlockPattern.matcher(texte);
-		if (matcherQualifier.find()) {
-			fQualifier = matcherQualifier.group(1);
-			if (matcherQualifier.groupCount() > 2) {
-				fTitle = matcherQualifier.group(3);
+		if (fStartIndex == 0) {
+			Matcher firstLineMatcher = FirstLinePattern.matcher(fText);
+			if (firstLineMatcher.find()) {
+				fStartIndex = firstLineMatcher.end() + 1;
+				fText = fText.substring((int) fStartIndex);
 			}
 		}
-		int currentOffset = matcherQualifier.start(1) + 1;
-		int offsetClose = -1;
-		int offsetOpen = -1;
-		
-		List<HemlElement> children = fChildren != null ? new ArrayList<>(Arrays.asList(fChildren)) : new ArrayList<>();
-		int currentIdx = 0;
-		do {
-			offsetClose = endBlockMatcher.find(currentOffset) ? endBlockMatcher.start() : -1;
-			// search next qualifier.
-			if (matcherQualifier.find(currentOffset) && (offsetOpen = matcherQualifier.start(1) - 1) < offsetClose) { //there is a child
-				HemlElement newChild = null;
-				long subOffset = offset + offsetOpen;
-				String subText = fText.substring(offsetOpen);
-				if (currentIdx < children.size()) {
-					newChild = children.get(currentIdx);
-					newChild.update(subText, subOffset);
-				}
-				else {
-					newChild = new HemlElement(subText, this, subOffset);
-					children.add(newChild);
-				}
-				currentIdx++;
-				currentOffset = offsetOpen + newChild.getText().length();
-			} else break;
-		} while(offsetClose != -1 && currentOffset < fText.length());
-		if (offsetClose != -1) {
-			fText = fText.substring(0, offsetClose + 1);
-		}
-		if (currentIdx < children.size()) children = children.subList(0, currentIdx);
-		fChildren = children.stream().toArray(HemlElement[]::new);
-		return true;
+		return update();
 	}
-	
 	/**
 	 * Get the child at the given offset in the document
 	 * @param offset the offset in the document
@@ -178,4 +149,59 @@ public class HemlElement {
 			}
 		}
 	}
+	
+	private boolean update() {
+		Matcher matcherQualifier = QualifierPattern.matcher(fText);
+		Matcher endBlockMatcher = EndBlockPattern.matcher(fText);
+		if (matcherQualifier.find()) {
+			fQualifier = matcherQualifier.group(1);
+			if (matcherQualifier.groupCount() > 2) {
+				fTitle = matcherQualifier.group(3);
+			}
+		}
+		int currentOffset = matcherQualifier.start(1) + 1;
+		int currentOffsetForClose = 0;
+		int offsetClose = -1;
+		int offsetOpen = -1;
+		
+		List<HemlElement> children = fChildren != null ? new ArrayList<>(Arrays.asList(fChildren)) : new ArrayList<>();
+		int currentIdx = 0;
+		Matcher matcherPlantUml = PlantUmlBlockPattern.matcher(fText);
+		Matcher matcherCode = CodeBlockPattern.matcher(fText);
+		if (matcherPlantUml.find() || matcherPlantUml.matches()) {
+			fText = matcherPlantUml.group();
+		}
+		else if (matcherCode.find()) {
+			fText = matcherCode.group();			
+		}
+		else {			
+			do {
+				offsetClose = endBlockMatcher.find(currentOffsetForClose) ? endBlockMatcher.start(1) : -1;
+				// search next qualifier.
+				if (matcherQualifier.find(currentOffset) && (offsetOpen = matcherQualifier.start(1) - 1) < offsetClose) { //there is a child
+					HemlElement newChild = null;
+					long subOffset = fStartIndex + offsetOpen;
+					String subText = fText.substring(offsetOpen);
+					if (currentIdx < children.size()) {
+						newChild = children.get(currentIdx);
+						newChild.update(subText, subOffset);
+					}
+					else {
+						newChild = new HemlElement(subText, this, subOffset);
+						children.add(newChild);
+					}
+					currentIdx++;
+					currentOffset = offsetOpen + newChild.getText().length();
+					currentOffsetForClose = currentOffset;
+				} else break;
+			} while(offsetClose != -1 && currentOffset < fText.length());			
+		}
+		if (offsetClose != -1) {
+			fText = fText.substring(0, offsetClose + 1);
+		}
+		if (currentIdx < children.size()) children = children.subList(0, currentIdx);
+		fChildren = children.stream().toArray(HemlElement[]::new);
+		return true;
+	}
+	
 }
