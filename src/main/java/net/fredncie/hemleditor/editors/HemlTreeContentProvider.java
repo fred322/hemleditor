@@ -8,7 +8,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.graphics.Image;
 
 public class HemlTreeContentProvider implements ITreeContentProvider, ILabelProvider {
-	private static Pattern CHILD_TO_HIDE = Pattern.compile("^([!#]|em|kw])");
+	private static Pattern CHILD_TO_HIDE = Pattern.compile("^(em|kw])");
 	
 	@Override
 	public Object[] getChildren(Object arg0) {

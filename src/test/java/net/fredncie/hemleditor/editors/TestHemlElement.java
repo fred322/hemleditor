@@ -11,8 +11,7 @@ import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
 /**
- * @author Fred
- *
+ * Test for the {@link HemlElement} class.
  */
 public class TestHemlElement {
 
@@ -44,7 +43,8 @@ public class TestHemlElement {
         HemlElement caoLeGrand = toto1.getChildren()[4];
         Assert.assertEquals(caoLeGrand.getLabel(), "section (cao le grand)");
         Assert.assertEquals(toto1.getChildren()[5].getLabel(), "comment");
-        Assert.assertEquals(toto1.getChildren()[6].getLabel(), "section (Nouvelle section)");
+        HemlElement nouvellSect = toto1.getChildren()[6];
+        Assert.assertEquals(nouvellSect.getLabel(), "section (Nouvelle section)");
         
         Assert.assertEquals(caoLeGrand.getChildren().length, 3);
         Assert.assertEquals(caoLeGrand.getChildren()[0].getLabel(), "section (Sub1)");
@@ -53,12 +53,35 @@ public class TestHemlElement {
         Assert.assertEquals(code2.getLabel(), "code (bash)");
         Assert.assertEquals(code2.getChildren().length, 1);
         Assert.assertEquals(code2.getChildren()[0].getLabel(), "code block");
+        
+        Assert.assertEquals(nouvellSect.getChildren().length, 2);
+        HemlElement subSection = nouvellSect.getChildren()[0];
+        Assert.assertEquals(subSection.getLabel(), "section (Sub Section)");
+        Assert.assertEquals(nouvellSect.getChildren()[1].getLabel(), "section (Response)");
                 
-        Assert.assertEquals(section2.getChildren().length, 4);
+        Assert.assertEquals(subSection.getChildren().length, 1);
+        Assert.assertEquals(subSection.getChildren()[0].getLabel(), "?table");
+                
+        Assert.assertEquals(section2.getChildren().length, 5);
         Assert.assertEquals(section2.getChildren()[0].getLabel(), "section (SubSection number 1)");
         Assert.assertEquals(section2.getChildren()[1].getLabel(), "section (SubSection number 2)");
         Assert.assertEquals(section2.getChildren()[2].getLabel(), "section (SubSection number 3)");
         Assert.assertEquals(section2.getChildren()[3].getLabel(), "section (SubSection number 4)");
+        Assert.assertEquals(section2.getChildren()[4].getLabel(), "?include");
 	}
 	
+	
+	@Test
+	public void testHemlIncomplet() throws IOException {
+        String data = Files.readFile(new File("src/test/resources/testIncomplet.heml"));
+        Assert.assertNotNull(data);
+        
+        HemlElement document = HemlElement.create(data);
+        Assert.assertNotNull(document);
+
+        Assert.assertEquals(document.getChildren().length, 1);
+        
+        HemlElement toto1 = document.getChildren()[0];
+        Assert.assertEquals(toto1.getLabel(), "section (Toto1)");
+	}
 }
