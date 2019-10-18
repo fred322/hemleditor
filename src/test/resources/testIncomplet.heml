@@ -5,7 +5,7 @@
      
          {section %title=too1
              {section %title=It is the foo
-                J'ecrit un test avec des {kw tes} et des } test 
+                J'ecrit un test avec des {kw tes} et des test 
                 pour voir ce qu'il faut avec.
              }
          }

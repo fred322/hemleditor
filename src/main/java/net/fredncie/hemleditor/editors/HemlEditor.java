@@ -22,6 +22,8 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -35,9 +37,30 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 	public HemlEditor() {
 		super();
 		setSourceViewerConfiguration(new HemlConfiguration());
-		setDocumentProvider(new HemlDocumentProvider());
+		HemlDocumentProvider hemlDocProvider = new HemlDocumentProvider();
+		hemlDocProvider.setDocumentListener(new IDocumentListener() {
+			@Override
+			public void documentChanged(DocumentEvent arg0) {
+				updateHelpers(arg0.getDocument());
+			}
+			@Override
+			public void documentAboutToBeChanged(DocumentEvent arg0) {
+			}
+		});
+		setDocumentProvider(hemlDocProvider);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
+	 */
+	@Override
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException
+	{
+	    super.init(site, input);
+	    IDocument document = getDocumentProvider().getDocument(input);
+        updateHelpers(document);
+	}
+		
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
@@ -46,16 +69,6 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 			IEditorInput input = this.getEditorInput();
 			IDocument document = this.getDocumentProvider().getDocument(input);
 			updateHelpers(document);
-			document.addDocumentListener(new IDocumentListener() {
-				@Override
-				public void documentChanged(DocumentEvent arg0) {
-					updateHelpers(document);
-				}
-				
-				@Override
-				public void documentAboutToBeChanged(DocumentEvent arg0) {					
-				}
-			});
 			fOutlinePage.addSelectionChangedListener(this);
 			this.getSelectionProvider().addSelectionChangedListener(fOutlinePage);
 			
@@ -102,12 +115,11 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 	private void updateHelpers(IDocument document) {
 		if (fMainHemlElement == null) {
 			fMainHemlElement = HemlElement.create(document.get());
-			fOutlinePage.setInput(fMainHemlElement);
 		}
 		else {
 			fMainHemlElement.update(document.get());
-			fOutlinePage.refresh();
 		}
+        if (fOutlinePage != null) fOutlinePage.setInput(fMainHemlElement);
 		updateFoldingStructure(fMainHemlElement);
 	}
 	private void updateFoldingStructure(HemlElement mainHeml) {
