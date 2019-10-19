@@ -9,6 +9,7 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
@@ -96,21 +97,36 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 		ISourceViewer viewer = new ProjectionViewer(parent, ruler, getOverviewRuler(), isOverviewRulerVisible(), styles);
 		// ensure decoration support has been created and configured.
 		getSourceViewerDecorationSupport(viewer);
+		viewer.getSelectionProvider().addSelectionChangedListener(this);
 		return viewer;
 	}
 	
 
 	@Override
 	public void selectionChanged(SelectionChangedEvent arg0) {
-		if (arg0.getSelection() instanceof TreeSelection) {
-			Object element = ((TreeSelection) arg0.getSelection()).getFirstElement();
-			if (element instanceof HemlElement) {
-				HemlElement hemlElement = (HemlElement) element;
-				this.selectAndReveal((int)hemlElement.getOffset(), 1);
-			}
-		}
+	    if (arg0.getSource() instanceof ProjectionViewer) {
+	        if (fMainHemlElement != null && arg0.getSelection() instanceof TextSelection) {
+	            int offsetSearch = Math.max(0, ((TextSelection) arg0.getSelection()).getOffset() - 1);
+	            HemlElement child = fMainHemlElement.getChild(offsetSearch);
+	            if (child != null) {
+	                Display.getDefault().asyncExec(new Runnable() {
+	                    @Override
+	                    public void run() {
+                            int newOffet = (int)child.getOffset();
+	                        setHighlightRange(newOffet, 1, false);
+	                    }
+	                });               
+	            }
+	        }
+	    }
+	    else if (arg0.getSelection() instanceof TreeSelection) {
+            Object element = ((TreeSelection) arg0.getSelection()).getFirstElement();
+            if (element instanceof HemlElement) {
+                HemlElement hemlElement = (HemlElement) element;
+                this.selectAndReveal((int)hemlElement.getOffset(), 1);
+            }
+        }
 	}
-	
 	
 	private void updateHelpers(IDocument document) {
 		if (fMainHemlElement == null) {
@@ -122,6 +138,7 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
         if (fOutlinePage != null) fOutlinePage.setInput(fMainHemlElement);
 		updateFoldingStructure(fMainHemlElement);
 	}
+	
 	private void updateFoldingStructure(HemlElement mainHeml) {
 		if (mainHeml != null) {
 			List<Position> positions = new ArrayList<Position>();
