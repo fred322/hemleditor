@@ -5,7 +5,7 @@ stages:
 build:
     stage: build
     script: gradle build -x test
-    
+
 test: 
     stage: test
     script: gradle build

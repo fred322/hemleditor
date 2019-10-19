@@ -44,15 +44,10 @@ dependencies {
     implementation 'com.google.guava:guava:28.0-jre'
     
     implementation('org.eclipse.platform:org.eclipse.core.runtime:3.14.0')
-    implementation('org.eclipse.platform:org.eclipse.ui:3.108.1')
-    implementation('org.eclipse.platform:org.eclipse.ui.ide:3.12.2')
-    implementation('org.eclipse.platform:org.eclipse.jface.text:3.13.0')
-    implementation('org.eclipse.platform:org.eclipse.ui.editors:3.10.1')
     implementation('org.eclipse.platform:org.eclipse.ui.genericeditor:1.1.0')
     implementation('org.eclipse.platform:org.eclipse.core.filebuffers:3.6.200')
     implementation('org.eclipse.platform:org.eclipse.core.resources:3.13.0')
     implementation('org.eclipse.platform:org.eclipse.ui.views:3.9.100')
-    implementation('org.eclipse.platform:org.eclipse.ui.workbench:3.110.0')
 
     // Use TestNG framework, also requires calling test.useTestNG() below
     testImplementation 'org.testng:testng:7.0.0'
