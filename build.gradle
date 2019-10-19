@@ -19,6 +19,7 @@ repositories {
 }
 
 ext {
+    projectName = "hemleditor"
     osgi_platform = 'gtk.linux.x86_64'
     swt_version = '3.112.0'
 }
@@ -51,6 +52,58 @@ dependencies {
 
     // Use TestNG framework, also requires calling test.useTestNG() below
     testImplementation 'org.testng:testng:7.0.0'
+}
+
+task tag {
+     doLast {
+          def manifestFile = "META-INF/MANIFEST.MF"
+          def medMajPart="\\([0-9]*.\\)\\{2\\}"
+          def stdout = new ByteArrayOutputStream();
+          exec {
+               executable 'sed'
+               args '-n', '"s/^Bundle-Version: \\(.*\\)$/\\1/p"', manifestFile
+               standardOutput = stdout
+          }
+          def oldVersion = stdout.toString().trim();
+          def nextVersion = null
+          def mainVersion = oldVersion.find(~/(\d+.\d+).(\d+)/) { match, major, minor ->
+               nextVersion = major + "." + (Integer.parseInt(minor) + 1);
+               return match
+          }
+          def projetTagName = projectName + "-" + mainVersion 
+          println "tag de " + projectName + " to " + projetTagName
+          
+          println "L'ancienne version est $oldVersion"
+          assert !oldVersion.isEmpty()
+          assert nextVersion != null && !nextVersion.isEmpty()
+          println "La nouvelle version est $nextVersion"
+          
+          exec {
+               executable 'sed'
+               args '-ie', '"s/^\\(Bundle-Version: \\).*$/\\1' + nextVersion + '/g"', manifestFile
+          }               
+          def messageTag = "[TAG] tag de " + projetTagName
+          exec {
+               executable "git"
+               args "tag", "-a", projetTagName, "-m", messageTag
+          }
+          
+          exec {
+             executable "git"
+             args "add", manifestFile
+          }
+          def commitMessage = "[TAG] Changement de version " + mainVersion + " -> " + nextVersion;
+          exec {
+               executable "git"
+               args "commit", "-m", commitMessage
+          }
+          
+          exec {
+            workingDir "${rootDir}/.."
+            executable "git"
+            args "push", "--follow-tags"
+          }
+     }
 }
 
 test {
