@@ -1,0 +1,27 @@
+{document 
+     {section %other=tot %title=Toto1
+     
+            {! --this is a lua code.
+            astre:open();
+            local ret = {
+               {}
+            }
+            !}
+         {section %title=too1
+             {section %title=It is the foo
+                J'ecrit un test avec des {kw tes} et des test 
+                pour voir ce qu'il faut avec.
+             }
+         }
+         {section %title=Nouvelle section
+            {section %title=Sub Section
+            }
+            {section %title=Response
+            }
+         }
+     }
+     {section %title=Section 2
+         {section %title=SubSection number 1}
+        {section %title=SubSection number 2}
+     }
+}

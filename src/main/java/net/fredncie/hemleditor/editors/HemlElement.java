@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jface.text.Position;
 
 public class HemlElement {
-	private static final Pattern FirstLinePattern = Pattern.compile("^\\{?[\\s\\S]*?\\}");
+	private static final Pattern FirstLinePattern = Pattern.compile("^\\{\\?[^\\?]*\\?\\}");
 	private static final Pattern QualifierPattern = Pattern.compile("^[^#\\{]*\\{(\\S+)([^\\n]*%(?:title|language)=([^%}\\n]+))?[^\\n]*$", Pattern.MULTILINE);
 	private static final Pattern EndBlockPattern = Pattern.compile("^[^#\\}]*(\\})[^\\n]*$", Pattern.MULTILINE);
 	private static final Pattern CommentBlockEndPattern = Pattern.compile("(#\\})");
@@ -162,6 +162,7 @@ public class HemlElement {
 	}
 	
 	private boolean update() {
+	    boolean ret = true;
 		Matcher matcherQualifier = QualifierPattern.matcher(fText);
 		if (matcherQualifier.find()) {
 			fQualifier = matcherQualifier.group(1);
@@ -177,14 +178,14 @@ public class HemlElement {
             if (endCode.find()) {
                 fText = fText.substring(0, endCode.end());              
             }
-            else return false;
+            else ret = false;
 		}
 		else if (fQualifier.startsWith("!")) {
 		    Matcher endCode = CodeBlockEndPattern.matcher(fText);
 		    if (endCode.find()) {
 	            fText = fText.substring(0, endCode.end());		        
 		    }
-		    else return false;
+		    else ret = false;
 		}
 		else {
 	        int offsetClose = -1;
@@ -220,7 +221,7 @@ public class HemlElement {
 		}
 		if (currentIdx < children.size()) children = children.subList(0, currentIdx);
 		fChildren = children.stream().toArray(HemlElement[]::new);
-		return true;
+		return ret;
 	}
 	
 }
