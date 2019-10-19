@@ -18,4 +18,5 @@ tag:
         - git checkout $CI_COMMIT_REF_NAME
         - gradle tag 
     when: manual
-    only: branches
+    only: 
+        - branches
