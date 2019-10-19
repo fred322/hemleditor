@@ -6,6 +6,8 @@
  * User Manual available at https://docs.gradle.org/5.6.2/userguide/java_library_plugin.html
  */
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
@@ -19,13 +21,25 @@ repositories {
     mavenCentral()
 }
 
+def manifestFile = "${projectDir}/META-INF/MANIFEST.MF"
+def getVersion() {
+     def manifestFile = "${projectDir}/META-INF/MANIFEST.MF"
+     String content = new File(manifestFile).getText("UTF-8");
+     Pattern pattern = Pattern.compile('^Bundle-Version: (.*)$', Pattern.MULTILINE);
+     Matcher matcher = pattern.matcher(content);
+     return matcher.find() ? matcher.group(1) : null;
+}
+
 ext {
     projectName = "hemleditor"
     osgi_platform = 'gtk.linux.x86_64'
     swt_version = '3.112.0'
+    
 }
 if (org.gradle.internal.os.OperatingSystem.current().isWindows()) ext.osgi_platform = "win32.win32.x86_64"
 
+project.group = 'net.fredncie.hemleditor'
+project.version = getVersion()
 
 configurations.all {
     resolutionStrategy {
@@ -51,7 +65,6 @@ dependencies {
 
 jar.doFirst {
      manifest {
-          def manifestFile = "${projectDir}/META-INF/MANIFEST.MF"
           if (new File(manifestFile).exists()) from (manifestFile);
      }
 }
@@ -67,14 +80,7 @@ sourceSets {
 
 task tag {
      doLast {
-          def manifestFile = "META-INF/MANIFEST.MF"
-          def stdout = new ByteArrayOutputStream();
-          exec {
-               executable 'sed'
-               args '-n', 's/^Bundle-Version: \\(.*\\)$/\\1/p', manifestFile
-               standardOutput = stdout
-          }
-          def oldVersion = stdout.toString().trim();
+          def oldVersion = getVersion();
           def nextVersion = null
           def mainVersion = oldVersion.find(~/(\d+.\d+).(\d+)/) { match, major, minor ->
                nextVersion = major + "." + (Integer.parseInt(minor) + 1);
