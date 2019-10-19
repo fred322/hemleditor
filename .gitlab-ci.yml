@@ -1,6 +1,7 @@
 stages:
     - build
     - test
+    - deploy
     - tag
 
 build:
@@ -11,6 +12,14 @@ test:
     stage: test
     script: gradle build
     
+deploy:
+    stage: deploy
+    script:
+        - git checkout $CI_COMMIT_REF_NAME
+        - gradle build install -x test -Dmaven.repo.local=$MVN_REPO
+    only:
+        - tags
+        
 tag:
     stage: tag
     script:
