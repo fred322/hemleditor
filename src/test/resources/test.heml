@@ -1,5 +1,5 @@
 {?set 
-    %encoding=utf-8?}
+    %encoding=utf-8}
 {document 
      {section %other=tot %title=Toto1
      

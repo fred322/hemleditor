@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import org.eclipse.jface.text.Position;
 
 public class HemlElement {
-	private static final Pattern FirstLinePattern = Pattern.compile("^\\{\\?[^\\?]*\\?\\}");
+	private static final Pattern FirstLinePattern = Pattern.compile("^\\{\\?[^\\}]*\\}");
 	private static final Pattern QualifierPattern = Pattern.compile("^[^#\\{]*\\{(\\S+)([^\\n]*%(?:title|language)=([^%}\\n]+))?[^\\n]*$", Pattern.MULTILINE);
 	private static final Pattern EndBlockPattern = Pattern.compile("^[^#\\}]*(\\})[^\\n]*$", Pattern.MULTILINE);
 	private static final Pattern CommentBlockEndPattern = Pattern.compile("(#\\})");
