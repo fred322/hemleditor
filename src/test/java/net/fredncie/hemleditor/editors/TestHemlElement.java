@@ -115,4 +115,15 @@ public class TestHemlElement {
         document.generatePosition(positions);
         Assert.assertEquals(positions.size(), 8);
 	}
+
+    @Test
+    public void testEmptyHeml() throws IOException {
+        String data = Files.readFile(new File("src/test/resources/emptyFile.heml"));
+        Assert.assertNotNull(data);
+        
+        HemlElement document = HemlElement.create(data);
+        Assert.assertNotNull(document);
+
+        Assert.assertEquals(document.getChildren().length, 0);
+    }
 }

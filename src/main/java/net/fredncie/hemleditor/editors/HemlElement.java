@@ -164,63 +164,67 @@ public class HemlElement {
 	private boolean update() {
 	    boolean ret = true;
 		Matcher matcherQualifier = QualifierPattern.matcher(fText);
-		if (matcherQualifier.find()) {
-			fQualifier = matcherQualifier.group(1);
-			if (matcherQualifier.groupCount() > 2) {
-				fTitle = matcherQualifier.group(3);
-				if (fTitle != null) fTitle = fTitle.trim();
-			}
-		}
-		List<HemlElement> children = fChildren != null ? new ArrayList<>(Arrays.asList(fChildren)) : new ArrayList<>();
-		int currentIdx = 0;
-		if (fQualifier.startsWith("#")) {
-            Matcher endCode = CommentBlockEndPattern.matcher(fText);
-            if (endCode.find()) {
-                fText = fText.substring(0, endCode.end());              
-            }
-            else ret = false;
-		}
-		else if (fQualifier.startsWith("!")) {
-		    Matcher endCode = CodeBlockEndPattern.matcher(fText);
-		    if (endCode.find()) {
-	            fText = fText.substring(0, endCode.end());		        
-		    }
-		    else ret = false;
-		}
+		fQualifier = "";
+		fTitle = "";
+        List<HemlElement> children = fChildren != null ? new ArrayList<>(Arrays.asList(fChildren)) : new ArrayList<>();
+		if (!matcherQualifier.find()) ret = false;
 		else {
-	        int offsetClose = -1;
-	        int offsetOpen = -1;
-	        
-	        // need to substring to have pattern with ^ working well
-	        int currentOffset = matcherQualifier.start(1) + 1;
-			do {
-	            String currentText = fText.substring(currentOffset);
-		        Matcher endBlockMatcher = EndBlockPattern.matcher(currentText);
-		        matcherQualifier = QualifierPattern.matcher(currentText);
-				offsetClose = endBlockMatcher.find() ? endBlockMatcher.start(1) : -1;
-				// search next qualifier.
-				if (matcherQualifier.find() && (offsetOpen = matcherQualifier.start(1) - 1) < offsetClose) { //there is a child
-					HemlElement newChild = null;
-					long subOffset = fStartIndex + currentOffset + offsetOpen;
-					String subText = currentText.substring(offsetOpen);
-					if (currentIdx < children.size()) {
-						newChild = children.get(currentIdx);
-						newChild.update(subText, subOffset);
-					}
-					else {
-						newChild = new HemlElement(subText, this, subOffset);
-						children.add(newChild);
-					}
-					currentIdx++;
-					currentOffset += offsetOpen + newChild.getText().length();
-				} else break;
-			} while(offsetClose != -1 && currentOffset < fText.length());	
-	        if (offsetClose != -1 && currentOffset + offsetClose + 1 < fText.length()) {
-	            fText = fText.substring(0, currentOffset + offsetClose + 1);
-	        }		
+            fQualifier = matcherQualifier.group(1);
+            if (matcherQualifier.groupCount() > 2) {
+                fTitle = matcherQualifier.group(3);
+                if (fTitle != null) fTitle = fTitle.trim();
+            }
+
+            int currentIdx = 0;
+            if (fQualifier.startsWith("#")) {
+                Matcher endCode = CommentBlockEndPattern.matcher(fText);
+                if (endCode.find()) {
+                    fText = fText.substring(0, endCode.end());              
+                }
+                else ret = false;
+            }
+            else if (fQualifier.startsWith("!")) {
+                Matcher endCode = CodeBlockEndPattern.matcher(fText);
+                if (endCode.find()) {
+                    fText = fText.substring(0, endCode.end());              
+                }
+                else ret = false;
+            }
+            else {
+                int offsetClose = -1;
+                int offsetOpen = -1;
+                
+                // need to substring to have pattern with ^ working well
+                int currentOffset = matcherQualifier.start(1) + 1;
+                do {
+                    String currentText = fText.substring(currentOffset);
+                    Matcher endBlockMatcher = EndBlockPattern.matcher(currentText);
+                    matcherQualifier = QualifierPattern.matcher(currentText);
+                    offsetClose = endBlockMatcher.find() ? endBlockMatcher.start(1) : -1;
+                    // search next qualifier.
+                    if (matcherQualifier.find() && (offsetOpen = matcherQualifier.start(1) - 1) < offsetClose) { //there is a child
+                        HemlElement newChild = null;
+                        long subOffset = fStartIndex + currentOffset + offsetOpen;
+                        String subText = currentText.substring(offsetOpen);
+                        if (currentIdx < children.size()) {
+                            newChild = children.get(currentIdx);
+                            newChild.update(subText, subOffset);
+                        }
+                        else {
+                            newChild = new HemlElement(subText, this, subOffset);
+                            children.add(newChild);
+                        }
+                        currentIdx++;
+                        currentOffset += offsetOpen + newChild.getText().length();
+                    } else break;
+                } while(offsetClose != -1 && currentOffset < fText.length());   
+                if (offsetClose != -1 && currentOffset + offsetClose + 1 < fText.length()) {
+                    fText = fText.substring(0, currentOffset + offsetClose + 1);
+                }       
+            }
+            if (currentIdx < children.size()) children = children.subList(0, currentIdx);
 		}
-		if (currentIdx < children.size()) children = children.subList(0, currentIdx);
-		fChildren = children.stream().toArray(HemlElement[]::new);
+        fChildren = children.stream().toArray(HemlElement[]::new);
 		return ret;
 	}
 	
