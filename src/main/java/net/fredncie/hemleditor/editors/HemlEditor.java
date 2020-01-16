@@ -34,6 +34,9 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 	private ProjectionAnnotationModel fAnnotationModel;
 	private Annotation[] fCurrentAnnotations;
 	private HemlElement fMainHemlElement;
+    private boolean fUpdating = false;
+    private String fDocContentForUpdate = null;
+    private final Object fMutexDocContent = new Object();
 	
 	public HemlEditor() {
 		super();
@@ -129,14 +132,38 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 	}
 	
 	private void updateHelpers(IDocument document) {
-		if (fMainHemlElement == null) {
-			fMainHemlElement = HemlElement.create(document.get());
-		}
-		else {
-			fMainHemlElement.update(document.get());
-		}
-        if (fOutlinePage != null) fOutlinePage.setInput(fMainHemlElement);
-		updateFoldingStructure(fMainHemlElement);
+        synchronized (fMutexDocContent) {
+            fDocContentForUpdate = document.get();            
+        }
+        
+        if (!fUpdating) {
+            fUpdating = true;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    updateHelpers2();
+                }
+            }).start();
+        }
+	}
+	
+	private void updateHelpers2() {
+        String documentContent = null;
+        synchronized (fMutexDocContent) {
+            if (fDocContentForUpdate != null) {
+                documentContent = fDocContentForUpdate;
+                fDocContentForUpdate = null;
+            }
+        }
+        if (documentContent != null) {            
+            if (fMainHemlElement == null) fMainHemlElement = HemlElement.create(documentContent);
+            else fMainHemlElement.update(documentContent);
+            if (fOutlinePage != null) fOutlinePage.setInput(fMainHemlElement);
+            updateFoldingStructure(fMainHemlElement);
+            System.out.println("Updateing");
+            updateHelpers2();
+        }
+        else fUpdating = false;        
 	}
 	
 	private void updateFoldingStructure(HemlElement mainHeml) {
