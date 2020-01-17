@@ -16,4 +16,37 @@
             editorId="org.eclipse.ui.genericeditor.GenericEditor">
       </editorContentTypeBinding>
    </extension>
+   <extension
+         point="org.eclipse.ui.themes">
+         <themeElementCategory id="net.fredncie.hemleditor.preferences.themeElementCategory" label="HEML Editor">
+               <description>Colors for HEML Editor</description>
+         </themeElementCategory>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.tagsColor" label="Tags" value="0,128,0">
+               <description>Color for the tags ({tag })</description>
+         </colorDefinition>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.parametersColor" label="Parameters" value="128,0,128">
+               <description>Color for the parameters (%param=)</description>
+         </colorDefinition>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.commentsColor" label="Comments" value="95,95,95">
+               <description>Color for the comments (%%comments)</description>
+         </colorDefinition>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.italicColor" label="Italic" value="0,0,0">
+               <description>Color for the italic elements ({i })</description>
+         </colorDefinition>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.kwColor" label="KeyWords" value="255,0,0">
+               <description>Color for the keywords elements ({kw })</description>
+         </colorDefinition>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.emphasizeColor" label="Emphasized" value="0,0,0">
+               <description>Color for the emphasized elements ({em })</description>
+         </colorDefinition>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.codeColor" label="Code block" value="255,0,128">
+               <description>Color for the block of code elements ({! !})</description>
+         </colorDefinition>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.tableColor" label="Table block" value="157,0,0">
+               <description>Color for the block of code elements ({? })</description>
+         </colorDefinition>
+         <colorDefinition categoryId="net.fredncie.hemleditor.preferences.themeElementCategory" id="net.fredncie.hemleditor.preferences.commentsBlockColor" label="Comments block" value="0,0,255">
+               <description>Color for the block of code elements ({# #})</description>
+         </colorDefinition>
+   </extension>
 </plugin>

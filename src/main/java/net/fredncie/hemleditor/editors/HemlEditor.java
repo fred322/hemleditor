@@ -160,7 +160,6 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
             else fMainHemlElement.update(documentContent);
             if (fOutlinePage != null) fOutlinePage.setInput(fMainHemlElement);
             updateFoldingStructure(fMainHemlElement);
-            System.out.println("Updateing");
             updateHelpers2();
         }
         else fUpdating = false;        

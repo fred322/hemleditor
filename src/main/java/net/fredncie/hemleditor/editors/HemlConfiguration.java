@@ -14,9 +14,9 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 public class HemlConfiguration extends SourceViewerConfiguration {
 
-	private HemlReconciler hemlReconciler = new HemlReconciler();
-	private IContentAssistProcessor hemlAssistantProcessor = new HemlContentAssistProcessor();
-	private ContentAssistant assistant = new ContentAssistant();
+	private final HemlReconciler hemlReconciler = new HemlReconciler();
+	private final IContentAssistProcessor hemlAssistantProcessor = new HemlContentAssistProcessor();
+	private final ContentAssistant assistant = new ContentAssistant();
 
 	public HemlConfiguration() {	
 		this.assistant.setContentAssistProcessor(hemlAssistantProcessor, IDocument.DEFAULT_CONTENT_TYPE);
@@ -30,6 +30,7 @@ public class HemlConfiguration extends SourceViewerConfiguration {
 	}
 	@Override
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
+	    this.hemlReconciler.setSourceViewer(sourceViewer);
 		return this.hemlReconciler;
 	}
 	
