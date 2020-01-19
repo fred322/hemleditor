@@ -11,10 +11,6 @@
             id="net.fredncie.hemleditor.editors.HemlEditor"
             name="Heml Editor">
       </editor>
-      <editorContentTypeBinding
-            contentTypeId="hemleditor.project"
-            editorId="org.eclipse.ui.genericeditor.GenericEditor">
-      </editorContentTypeBinding>
    </extension>
    <extension
          point="org.eclipse.ui.themes">
@@ -49,4 +45,22 @@
                <description>Color for the block of code elements ({# #})</description>
          </colorDefinition>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+         <command id="net.fredncie.hemleditor.command.format" name="FormatCommand" defaultHandler="net.fredncie.hemleditor.editors.FormatCommandHandler">
+         </command>
+    </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+         <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+               <menu id="fileMenu" label="File">
+                    <command commandId="net.fredncie.hemleditor.command.format" label="format" tooltip="Format the document" style="push"/>
+               </menu>
+         </menuContribution>
+         <menuContribution locationURI="menu:edit?after=additions">
+               <menu id="fileMenu" label="File">
+                    <command commandId="net.fredncie.hemleditor.command.format" label="format" tooltip="Format the document" style="push"/>
+               </menu>
+         </menuContribution>
+    </extension>
 </plugin>

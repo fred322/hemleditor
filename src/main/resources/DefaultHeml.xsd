@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/DefaultHeml" xmlns:tns="http://www.example.org/DefaultHeml" elementFormDefault="qualified">
+
+    
+    <complexType name="sectionType">
+    	<sequence>
+    		<element name="section" type="tns:sectionType"></element>
+    		<element name="kw" type="string"></element>
+    		<element name="i" type="string"></element>
+    		<element name="references" type="tns:referencesType"></element>
+    		<element name="definitions" type="tns:definitionsType"></element>
+    		<element name="req" type="tns:reqType"></element>
+    		<element name="code" type="tns:codeType"></element>
+    		<element name="table" type="tns:tableType"></element>
+    		<element name="check" type="tns:checkType"></element>
+    		<element name="note" type="tns:noteType"></element>
+    		<element name="figure" type="tns:figureType"></element>
+    	</sequence>
+    	<attribute name="title" type="string"></attribute>
+    </complexType>
+
+    <element name="document" type="tns:documentType"></element>
+    
+    <complexType name="documentType">
+    	<sequence>
+    		<element name="title" type="string" maxOccurs="1" minOccurs="1"></element>
+    		<element name="reference" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="date" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="history" type="tns:historyType" maxOccurs="1" minOccurs="0"></element>
+    		<element name="copyright" type="tns:copyrightType" maxOccurs="1" minOccurs="0"></element>
+    		<element name="author" type="tns:authorType" maxOccurs="1" minOccurs="0"></element>
+          <element name="version" type="string" maxOccurs="1" minOccurs="0"></element>
+          <element name="revision" type="string" maxOccurs="1" minOccurs="0"></element>
+          <element name="abstract" type="string" maxOccurs="1" minOccurs="0"></element>
+          <element name="keywords" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="section" type="tns:sectionType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+
+    <complexType name="historyType">
+    	<sequence>
+    		<element name="edition" type="tns:editionType"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="copyrightType">
+    	<attribute name="year" type="int"></attribute>
+    	<attribute name="holder" type="string"></attribute>
+    </complexType>
+
+    <complexType name="authorType">
+    	<attribute name="sigle" type="string"></attribute>
+    </complexType>
+
+    <complexType name="referencesType">
+    	<sequence>
+    		<element name="ref" type="tns:refType"></element>
+    	</sequence>
+    	<attribute name="title" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
+    </complexType>
+
+    <complexType name="definitionsType">
+    	<sequence>
+    		<element name="def" type="tns:defType"></element>
+    	</sequence>
+    	<attribute name="title" type="string"></attribute>
+    </complexType>
+    
+    <complexType name="tableType">
+    	<sequence>
+    		<element name="tr" type="tns:trType"></element>
+    	</sequence>
+    	<attribute name="title" type="string"></attribute>
+    </complexType>
+    
+    <complexType name="trType">
+    	<choice>
+    		<element name="td" type="string"></element>
+    		<element name="th" type="string"></element>
+    	</choice>
+    </complexType>
+
+    <complexType name="checkType">
+    	<sequence>
+    		<element name="operation" type="tns:operationType"></element>
+    		<element name="assert" type="tns:assertType"></element>
+    	</sequence>
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="title" type="string"></attribute>
+    	<attribute name="xref" type="string"></attribute>
+    </complexType>
+
+    <complexType name="operationType">
+    	<sequence>
+    		<element name="code" type="tns:codeType"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="assertType">
+    	<sequence>
+    		<element name="req" type="tns:reqType"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="reqType">
+    	<attribute name="id" type="string"></attribute>
+    </complexType>
+
+    <complexType name="editionType">
+    	<attribute name="version" type="string"></attribute>
+    	<attribute name="date" type="string"></attribute>
+    	<attribute name="author" type="string"></attribute>
+    </complexType>
+
+    <complexType name="refType">
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="author" type="string"></attribute>
+    	<attribute name="editino" type="string"></attribute>
+    	<attribute name="ref" type="string"></attribute>
+    </complexType>
+
+    <complexType name="defType">
+    	<attribute name="entry" type="string"></attribute>
+    </complexType>
+
+    <complexType name="codeType">
+    	<attribute name="language" type="string"></attribute>
+    	<attribute name="title" type="string"></attribute>
+    </complexType>
+
+    <complexType name="noteType">
+    	<attribute name="type" type="string"></attribute>
+    	<attribute name="title" type="string"></attribute>
+    </complexType>
+
+    <complexType name="figureType">
+    	<attribute name="title" type="string"></attribute>
+    	<attribute name="src" type="string"></attribute>
+    </complexType>
+</schema>

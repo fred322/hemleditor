@@ -1,5 +1,7 @@
 package net.fredncie.hemleditor.editors;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,62 +27,41 @@ public class HemlContentAssistProcessor implements IContentAssistProcessor {
 	private static final String KEYWORDS = "keywords";
 	
 	private static final String COPYRIGHT = "copyright";
-	private static final String AUTHOR = "author";
-	private static final String HISTORY = "history";
 	private static final String EDITION = "edition";
-	private static final String SECTION = "section";
-	private static final String REFERENCES = "references";
 	private static final String REFERENCE = "ref";
-	private static final String DEFINITIONS = "definitions";
 	private static final String DEFINITION = "def";
 	private static final String REQUIREMENT = "req";
-	private static final String CODE = "code";
-	private static final String TABLE = "table";
-	private static final String TR = "tr";
 	private static final String TH = "th";
-	private static final String CHECK = "check";
-	private static final String OPERATION = "operation";
-	private static final String ASSERT = "assert";
-	private static final String NOTE = "note";
-	private static final String FIGURE = "fig";
-		
-    private static final Map<String, String[]> MAP_PARAMS = new HashMap<>();
-    private static final Map<String, String[]> MAP_TAGS = new HashMap<>();
-    private static final Set<String> INLINE_TAGS = new HashSet<>();
+	private static final Set<String> INLINE_TAGS = new HashSet<>();
+    
+    private HemlAutocompletionProvider autoCompletionProvider = new HemlAutocompletionProvider();
     
     static {
-        MAP_PARAMS.put(COPYRIGHT, new String[]{ "year", "holder" });
-        MAP_PARAMS.put(AUTHOR, new String[]{ "sigle" });
-        MAP_PARAMS.put(EDITION, new String[]{ "version", "date" });
-        MAP_PARAMS.put(SECTION, new String[]{ "title" });
-        MAP_PARAMS.put(REFERENCES, new String[]{ "title", "id" });
-        MAP_PARAMS.put(REFERENCE, new String[]{ "id", "author", "edition", "ref" });
-        MAP_PARAMS.put(DEFINITIONS, new String[]{ "title" });
-        MAP_PARAMS.put(DEFINITION, new String[]{ "entry" });
-        MAP_PARAMS.put(REQUIREMENT, new String[]{ "id" });
-        MAP_PARAMS.put(CODE, new String[]{ "language", "title" });
-        MAP_PARAMS.put(CHECK, new String[]{ "id", "title", "xref" });
-        MAP_PARAMS.put(NOTE, new String[]{ "type", "title" });
-        MAP_PARAMS.put(FIGURE, new String[]{ "title", "src" });
-        MAP_PARAMS.put(TABLE, new String[]{ "title" });
-        
-        MAP_TAGS.put(DOCUMENT, new String[]{ TITLE, REFERENCE_1, DATE, VERSION, REVISION, COPYRIGHT , AUTHOR, ABSTRACT, KEYWORDS, HISTORY, SECTION });
-        MAP_TAGS.put(HISTORY, new String[]{ EDITION });
-        MAP_TAGS.put(SECTION, new String[]{ SECTION, REFERENCES, DEFINITIONS, REQUIREMENT, CODE, TABLE, CHECK, NOTE, FIGURE });
-        MAP_TAGS.put(REFERENCES, new String[]{ REFERENCE });
-        MAP_TAGS.put(DEFINITIONS, new String[]{ DEFINITION });
-        MAP_TAGS.put(TABLE, new String[]{ TR });
-        MAP_TAGS.put(TR, new String[]{ TH });
-        MAP_TAGS.put(CHECK, new String[]{ OPERATION, ASSERT });
-        MAP_TAGS.put(OPERATION, new String[]{ CODE });
-        MAP_TAGS.put(ASSERT, new String[]{ REQUIREMENT });
-        
-        INLINE_TAGS.addAll(Arrays.asList(TITLE, REFERENCE_1, DATE, VERSION, REVISION, COPYRIGHT, ABSTRACT, REFERENCE, EDITION, DEFINITION, TH, REQUIREMENT, KEYWORDS ));
+        INLINE_TAGS.addAll(Arrays.asList(TITLE, REFERENCE_1, DATE, VERSION, REVISION, COPYRIGHT, 
+                ABSTRACT, REFERENCE, EDITION, DEFINITION, TH, REQUIREMENT, KEYWORDS, "kw", "i" ));
+    }
+    
+    public HemlContentAssistProcessor() {
+        try (InputStream stream = getClass().getClassLoader().getResourceAsStream("DefaultHeml.xsd")) {
+            if (stream != null) {
+                autoCompletionProvider.loadXsd(stream);
+            }   
+            else {
+                System.err.println("Cannot load DefaultHeml.xsd");
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     @Override
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
         String text = viewer.getDocument().get();
+        
+        HemlElement element = HemlElement.create(text);
+        if (element != null) element = element.getChild(offset);
+        
         String tagStart = "{";
         String paramStart = "%";
 
@@ -89,7 +70,10 @@ public class HemlContentAssistProcessor implements IContentAssistProcessor {
         String startText = text.substring(lastSpace + 1, offset);
         if (!startText.contains(" ")) {
             if (startText.startsWith(tagStart)) {
-            	String parent = findParent(text, lastSpace);
+                HemlElement parent = element;
+                if (startText.length() > 1) {
+                    parent = element != null ? element.getParent() : null;
+                }
                 String startTagName = startText.substring(tagStart.length());
 
                 String indentStr = "";
@@ -99,7 +83,7 @@ public class HemlContentAssistProcessor implements IContentAssistProcessor {
                     indentStr = text.substring(startLine + 1, startTag);
                 }
                 final String finalIndentStr = indentStr;
-                String[] tags = parent != null ? MAP_TAGS.get(parent) : new String[]{ DOCUMENT };
+                String[] tags = parent != null ? autoCompletionProvider.getElements(parent) : new String[]{ DOCUMENT };
                 if (tags != null) {
                     proposals = Arrays.asList(tags).stream()
                             .filter(tag -> tag.startsWith(startTagName))
@@ -109,20 +93,13 @@ public class HemlContentAssistProcessor implements IContentAssistProcessor {
             }
             else if (startText.startsWith(paramStart)) {
                 String startParamName = startText.substring(paramStart.length());
-                int startParent = text.lastIndexOf('{', offset);
-                if (startParent != -1)
+                String[] params = autoCompletionProvider.getAttributes(element);
+                if (params != null)
                 {
-                    String parent = text.substring(startParent + 1, offset);
-                    parent = parent.split(" ")[0];
-                    String[] params = MAP_PARAMS.get(parent);
-                    if (params != null)
-                    {
-                        proposals = Arrays.asList(params).stream()
-                                .filter(param -> param.startsWith(startParamName))
-                                .map(param -> createParamCompletionProposal(param, startParamName.length(), offset))
-                                .toArray(CompletionProposal[]::new);
-                    }
-                    
+                    proposals = Arrays.asList(params).stream()
+                            .filter(param -> param.startsWith(startParamName))
+                            .map(param -> createParamCompletionProposal(param, startParamName.length(), offset))
+                            .toArray(CompletionProposal[]::new);
                 }
             }
         }
@@ -166,30 +143,5 @@ public class HemlContentAssistProcessor implements IContentAssistProcessor {
     	// String left = tag.substring(tagOffset);
     	String toShow = "%" + tag + "=";
     	return new CompletionProposal(toShow, offset - tagOffset - 1, tagOffset + 1, tag.length() + 2);
-    }
-    
-    
-    private String findParent(String text, int offset) {
-    	String ret = null;
-    	if (offset > 0) {
-    		int bracketNum = 0;
-    		String toAnalyze = text.substring(0, offset);
-    		int currentIdx = toAnalyze.length() - 1;
-    		for (; currentIdx >= 0; currentIdx--) {
-    			if (toAnalyze.charAt(currentIdx) == '}') bracketNum++;
-    			else if (toAnalyze.charAt(currentIdx) == '{') {
-    				if (bracketNum == 0) break;
-    				else bracketNum--;	
-    			}
-    		}
-    		
-    		if (currentIdx >= 0) {
-    			int space = text.indexOf(" ", currentIdx);
-    			if (space != -1) {
-    				ret = text.substring(currentIdx + 1, space);
-    			}
-    		}
-    	}
-    	return ret;
     }
 }
