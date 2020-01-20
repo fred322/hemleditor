@@ -6,7 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,17 +18,21 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.text.Position;
 
 public class HemlElement {
+    private static final String DEFAULT_INDENT = String.format("%4s", "");
+    
 	private static final Pattern FirstLinePattern = Pattern.compile("^\\{\\?[^\\}]*\\}");
 	private static final Pattern QualifierPattern = Pattern.compile("^[^#\\{]*\\{(\\S+)([^\\n]*%(?:title|language)=([^%}\\n]+))?[^\\n]*$", Pattern.MULTILINE);
 	private static final Pattern EndBlockPattern = Pattern.compile("^[^#\\}]*(\\})[^\\n]*$", Pattern.MULTILINE);
 	private static final Pattern CommentBlockEndPattern = Pattern.compile("(#\\})");
     private static final Pattern CodeBlockEndPattern = Pattern.compile("(!\\})");
+    private static final Pattern attributesPattern = Pattern.compile("%([^%]+)=([^%}]+)");
 	private HemlElement fParent;
 	private String fText;
 	private String fQualifier;
 	private String fTitle;
 	private long fStartIndex;
 	private HemlElement[] fChildren;
+	private final Map<String, String> fDocOptions = new HashMap<>();
 
 	private HemlElement(String texte, HemlElement parent, long offset) {
 		fParent = parent;
@@ -85,6 +92,13 @@ public class HemlElement {
 			if (firstLineMatcher.find()) {
 				fStartIndex = firstLineMatcher.end() + 1;
 				fText = fText.substring((int) fStartIndex);
+			
+				String firstLine = firstLineMatcher.group();
+                Matcher matcherAttribute = attributesPattern.matcher(firstLine);
+                while (matcherAttribute.find()) {
+                    fDocOptions.put(matcherAttribute.group(1).trim(), matcherAttribute.group(2).trim());
+                }
+
 			}
 		}
 		return update();
@@ -167,56 +181,99 @@ public class HemlElement {
 			}
 		}
 	}
-	
-	public void write(StringBuilder output, int indentation) {
+
+    public void write(StringBuilder output, int indentation) {
+        write(output, indentation, 0);
+    }
+    
+	public void write(StringBuilder output, int indentation, int previousIndentation) {
         List<HemlElement> children = fChildren != null ? new ArrayList<>(Arrays.asList(fChildren)) : new ArrayList<>();
         long currentOffset = 0;
         String firstLineIndentationStr = indentation > 0 ? String.format("%" + indentation + "s", "") : "";
         boolean firstLine = true;
+        if (output.length() == 0 && !fDocOptions.isEmpty()) {
+            output.append("{?set");
+            for (Entry<String, String> attribute : fDocOptions.entrySet()) {
+                output.append(" %").append(attribute.getKey()).append("=").append(attribute.getValue());
+            }
+            output.append("}\n");
+        }
         for (HemlElement child : children) {
             long childOffset = child.getOffset() - getOffset();
             if (!"kw".equals(child.getQualifier()) && !"i".equals(child.getQualifier()) && !"em".equals(child.getQualifier())) {
                 if (currentOffset < childOffset) {
                     String substring = fText.substring((int)currentOffset, (int)childOffset);
-                    writeText(substring, output, firstLineIndentationStr, firstLine, false);
+                    writeText(substring, output, firstLineIndentationStr, previousIndentation, firstLine, false);
                 }
                 firstLine = false;
-                
-                if ("!".equals(child.getQualifier())) {
-                    // the code must be at the indentation 0
-                    String childText = child.getText();
-                    String beforeText = fText.substring(0, (int)childOffset);
-                    int codeIndent = Math.max(0, (int)childOffset - (beforeText.lastIndexOf('\n') + 1));
-                    boolean codeFirstLine = true;
-                    for (String line : childText.split("\n")) {
-                        if (!codeFirstLine) line = line.substring(codeIndent);
-                        output.append(line);
-                        output.append("\n");
-                        codeFirstLine = false;
-                    }
-                }
-                else child.write(output, indentation + 4);
+
+                String beforeText = fText.substring(0, (int)childOffset);
+                int childPreviousIndent = Math.max(0, (int)childOffset - (beforeText.lastIndexOf('\n') + 1));
+                child.write(output, indentation + 4, childPreviousIndent);
                 currentOffset = childOffset + child.getTextLength();                
             }
         }
         if (currentOffset < getTextLength()) {
             String substring = fText.substring((int)currentOffset);
-            writeText(substring, output, firstLineIndentationStr, firstLine, true);            
+            writeText(substring, output, firstLineIndentationStr, previousIndentation, firstLine, true);            
         }
 	}
 	
-	private void writeText(String texte, StringBuilder output, String indentation, boolean hasFirstLine, boolean hasLastLine) {
-	    String subIndentation = indentation + "    ";
-	    String[] lines = texte.split("\n");
+	private void writeText(String texte, StringBuilder output, String indentation, 
+	        int previousIndent, boolean hasFirstLine, boolean hasLastLine) {
+	    String subIndentation = indentation;
+	    boolean keepSpaces = false;
+	    if (!"#".equals(getQualifier()) && !"!".equals(getQualifier())) {
+	        subIndentation += DEFAULT_INDENT;
+	    }
+	    else {
+            // the code must be at the indentation 0
+	        if ("!".equals(getQualifier())) {
+	            indentation = "";
+	            subIndentation = "";
+	        }
+	        keepSpaces = true;
+	    }
+	    int itemLevel = 0;
+	    int previousItemSpacesCount = 0;
+	    String[] lines = texte.replace("\t", DEFAULT_INDENT).split("\n");
 	    for (int idxLine = 0; idxLine < lines.length; idxLine++) {
 	        String line = lines[idxLine];
             String trimmed = line.trim();
             if (!trimmed.isEmpty()) {
-                if (hasLastLine && idxLine == lines.length - 1 && trimmed.length() <= 2 || hasFirstLine && idxLine == 0) {
+                boolean firstLine = hasFirstLine && idxLine == 0;
+                if (hasLastLine && idxLine == lines.length - 1 && trimmed.length() <= 2 || firstLine) {
                     output.append(indentation);
                 }
                 else output.append(subIndentation);
-                output.append(line.trim()).append("\n");
+                
+                if (keepSpaces && !firstLine) line = line.substring(previousIndent);
+                else {
+                    line = line.replaceAll("\\s*$", "");
+                    String trimmedLine = line.replaceAll("^\\s*", "");
+                    int leftSpacesCount = line.length() - trimmedLine.length();
+                    if (trimmedLine.startsWith("-")) {
+                        if (leftSpacesCount > previousItemSpacesCount) {
+                            itemLevel++;
+                            previousItemSpacesCount = leftSpacesCount;
+                        }
+                        else if (leftSpacesCount < previousItemSpacesCount) {
+                            itemLevel--;
+                            previousItemSpacesCount = leftSpacesCount;
+                            if (itemLevel < 0) {
+                                System.err.println("HEML error with items in block: " + getLabel());
+                            }
+                        }
+                        if (itemLevel > 0) {
+                            output.append(String.format("%" + (itemLevel * 4) + "s", ""));                            
+                        }
+                        else itemLevel = 0;
+                    }
+                    
+                    line = trimmedLine;
+                }
+                
+                output.append(line).append("\n");
             }
 	    }
 	}
@@ -243,7 +300,6 @@ public class HemlElement {
                 fTitle = matcherQualifier.group(3);
                 if (fTitle != null) fTitle = fTitle.trim();
             }
-
             int currentIdx = 0;
             if (fQualifier.startsWith("#")) {
                 Matcher endCode = CommentBlockEndPattern.matcher(fText);
