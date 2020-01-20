@@ -98,7 +98,6 @@ public class HemlElement {
                 while (matcherAttribute.find()) {
                     fDocOptions.put(matcherAttribute.group(1).trim(), matcherAttribute.group(2).trim());
                 }
-
 			}
 		}
 		return update();
@@ -271,8 +270,7 @@ public class HemlElement {
                     }
                     
                     line = trimmedLine;
-                }
-                
+                }                
                 output.append(line).append("\n");
             }
 	    }
