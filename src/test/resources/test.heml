@@ -49,9 +49,13 @@
          {# un petit commentaire #}
          {section %title=Nouvelle section
             {section %title=Sub Section
-            {?table
-                {th col1} {th col2} {th col3}
-                val1 % val2 % val3
+            {table
+                {tr
+                    {th col1} {th col2} {th col3}
+                }
+		        {?table
+		            val1 % val2 % val3
+		        }
             }
             }
             {section %title=Response

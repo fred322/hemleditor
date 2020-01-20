@@ -53,12 +53,12 @@
    <extension
          point="org.eclipse.ui.menus">
          <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-               <menu id="fileMenu" label="File">
+               <menu id="fileMenu" label="Heml">
                     <command commandId="net.fredncie.hemleditor.command.format" label="format" tooltip="Format the document" style="push"/>
                </menu>
          </menuContribution>
          <menuContribution locationURI="menu:edit?after=additions">
-               <menu id="fileMenu" label="File">
+               <menu id="fileMenu" label="Heml">
                     <command commandId="net.fredncie.hemleditor.command.format" label="format" tooltip="Format the document" style="push"/>
                </menu>
          </menuContribution>

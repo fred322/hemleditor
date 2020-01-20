@@ -1,0 +1,72 @@
+{document
+    {section %other=tot %title=Toto1
+{! --this is a lua code.
+astre:open();
+local ret = {
+   {}
+}
+!}
+        # ceci est un commentaire {section }
+        {em italic %title=tptp}
+        {# plantml src=toto.log
+            class rata {
+            }
+            class blob {
+            }
+            #{lol}
+            class naboo {}
+        #}
+        {section %title=too1
+            {section %title=It is the foo
+                J'ecrit un test avec des {kw tes} et des test
+                pour voir ce qu'il faut avec.
+            }
+        }
+        {section %title=cao le grand
+            {section %title=Sub1
+                {section %title=Sub4 }
+            }
+            {code %language=lua
+{! --this is a lua code.
+astre:open();
+local ret = {
+   {}
+}!}
+            }
+            {code %language=bash
+{! --this is a lua code.
+astre:open();
+local ret = {
+   {}
+}!}
+            }
+        }
+        {# un petit commentaire #}
+        {section %title=Nouvelle section
+            {section %title=Sub Section
+                {table
+                    {tr
+                        {th col1}
+                        {th col2}
+                        {th col3}
+                    }
+                    {?table
+                        val1 % val2 % val3
+                    }
+                }
+            }
+            {section %title=Response
+                {?table
+                }
+            }
+        }
+    }
+    {section %title=Section 2
+        {section %title=SubSection number 1}
+        {section %title=SubSection number 2}
+        {section %title=SubSection number 3}
+        {section %title=SubSection number 4
+        }
+        {?include %src=other.lua}
+    }
+}

@@ -3,9 +3,7 @@ package net.fredncie.hemleditor.editors;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jface.text.ITextViewer;

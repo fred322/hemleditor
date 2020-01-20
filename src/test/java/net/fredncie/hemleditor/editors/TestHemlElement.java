@@ -5,13 +5,15 @@ package net.fredncie.hemleditor.editors;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.text.Position;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.testng.reporters.Files;
+
+import com.google.common.io.Files;
 
 /**
  * Test for the {@link HemlElement} class.
@@ -23,11 +25,8 @@ public class TestHemlElement {
 	 * @throws IOException 
 	 */
 	@Test
-	public void testCreationHemlElement() throws IOException {
-		String data = Files.readFile(new File("src/test/resources/test.heml"));
-		Assert.assertNotNull(data);
-		
-		HemlElement document = HemlElement.create(data);
+	public void testCreationHemlElement() throws IOException {		
+		HemlElement document = HemlElement.create(new File("src/test/resources/test.heml"));
 		Assert.assertNotNull(document);
 		
 		Assert.assertEquals(document.getQualifier(), "document");
@@ -63,7 +62,8 @@ public class TestHemlElement {
         Assert.assertEquals(nouvellSect.getChildren()[1].getLabel(), "section (Response)");
                 
         Assert.assertEquals(subSection.getChildren().length, 1);
-        Assert.assertEquals(subSection.getChildren()[0].getLabel(), "?table");
+        Assert.assertEquals(subSection.getChildren()[0].getLabel(), "table");
+        Assert.assertEquals(subSection.getChildren()[0].getChildren()[1].getLabel(), "?table");
                 
         Assert.assertEquals(section2.getChildren().length, 5);
         Assert.assertEquals(section2.getChildren()[0].getLabel(), "section (SubSection number 1)");
@@ -74,15 +74,12 @@ public class TestHemlElement {
 
         List<Position> positions = new ArrayList<Position>();
         document.generatePosition(positions);
-        Assert.assertEquals(positions.size(), 19);
+        Assert.assertEquals(positions.size(), 21);
 	}
 	
 	@Test
-	public void testHemlWithoutFirstLine() throws IOException {
-        String data = Files.readFile(new File("src/test/resources/test2.heml"));
-        Assert.assertNotNull(data);
-        
-        HemlElement document = HemlElement.create(data);
+	public void testHemlWithoutFirstLine() throws IOException {        
+        HemlElement document = HemlElement.create(new File("src/test/resources/test2.heml"));
         Assert.assertNotNull(document);
         
         Assert.assertEquals(document.getQualifier(), "document");
@@ -100,10 +97,7 @@ public class TestHemlElement {
 	
 	@Test
 	public void testHemlIncomplet() throws IOException {
-        String data = Files.readFile(new File("src/test/resources/testIncomplet.heml"));
-        Assert.assertNotNull(data);
-        
-        HemlElement document = HemlElement.create(data);
+        HemlElement document = HemlElement.create(new File("src/test/resources/testIncomplet.heml"));
         Assert.assertNotNull(document);
 
         Assert.assertEquals(document.getChildren().length, 1);
@@ -118,12 +112,23 @@ public class TestHemlElement {
 
     @Test
     public void testEmptyHeml() throws IOException {
-        String data = Files.readFile(new File("src/test/resources/emptyFile.heml"));
-        Assert.assertNotNull(data);
-        
-        HemlElement document = HemlElement.create(data);
+        HemlElement document = HemlElement.create(new File("src/test/resources/emptyFile.heml"));
         Assert.assertNotNull(document);
 
         Assert.assertEquals(document.getChildren().length, 0);
+    }
+    
+    @Test
+    public void testWriteHeml() throws IOException {
+        HemlElement document = HemlElement.create(new File("src/test/resources/test.heml"));
+        Assert.assertNotNull(document);
+
+        File outputFile = new File("output.heml");
+        StringBuilder output = new StringBuilder();
+        document.write(output, 0);
+        Files.write(output.toString(), outputFile, StandardCharsets.UTF_8);
+        
+        Assert.assertEquals(java.nio.file.Files.readAllBytes(outputFile.toPath()),
+                java.nio.file.Files.readAllBytes(new File("src/test/resources/expectedFormatted.heml").toPath()));
     }
 }

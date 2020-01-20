@@ -1,5 +1,9 @@
 package net.fredncie.hemleditor.editors;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +11,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.text.Position;
 
 public class HemlElement {
@@ -25,6 +30,17 @@ public class HemlElement {
 	private HemlElement(String texte, HemlElement parent, long offset) {
 		fParent = parent;
 		update(texte, offset);
+	}
+	
+	public static HemlElement create(File file) {
+	    HemlElement ret = null;
+	    try {
+            ret = create(IOUtils.toString(Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)));
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ret;
 	}
 	
 	/**
@@ -150,6 +166,59 @@ public class HemlElement {
 				}				
 			}
 		}
+	}
+	
+	public void write(StringBuilder output, int indentation) {
+        List<HemlElement> children = fChildren != null ? new ArrayList<>(Arrays.asList(fChildren)) : new ArrayList<>();
+        long currentOffset = 0;
+        String firstLineIndentationStr = indentation > 0 ? String.format("%" + indentation + "s", "") : "";
+        boolean firstLine = true;
+        for (HemlElement child : children) {
+            long childOffset = child.getOffset() - getOffset();
+            if (!"kw".equals(child.getQualifier()) && !"i".equals(child.getQualifier()) && !"em".equals(child.getQualifier())) {
+                if (currentOffset < childOffset) {
+                    String substring = fText.substring((int)currentOffset, (int)childOffset);
+                    writeText(substring, output, firstLineIndentationStr, firstLine, false);
+                }
+                firstLine = false;
+                
+                if ("!".equals(child.getQualifier())) {
+                    // the code must be at the indentation 0
+                    String childText = child.getText();
+                    String beforeText = fText.substring(0, (int)childOffset);
+                    int codeIndent = Math.max(0, (int)childOffset - (beforeText.lastIndexOf('\n') + 1));
+                    boolean codeFirstLine = true;
+                    for (String line : childText.split("\n")) {
+                        if (!codeFirstLine) line = line.substring(codeIndent);
+                        output.append(line);
+                        output.append("\n");
+                        codeFirstLine = false;
+                    }
+                }
+                else child.write(output, indentation + 4);
+                currentOffset = childOffset + child.getTextLength();                
+            }
+        }
+        if (currentOffset < getTextLength()) {
+            String substring = fText.substring((int)currentOffset);
+            writeText(substring, output, firstLineIndentationStr, firstLine, true);            
+        }
+	}
+	
+	private void writeText(String texte, StringBuilder output, String indentation, boolean hasFirstLine, boolean hasLastLine) {
+	    String subIndentation = indentation + "    ";
+	    String[] lines = texte.split("\n");
+	    for (int idxLine = 0; idxLine < lines.length; idxLine++) {
+	        String line = lines[idxLine];
+            String trimmed = line.trim();
+            if (!trimmed.isEmpty()) {
+                if (hasLastLine && idxLine == lines.length - 1 && trimmed.length() <= 2 || hasFirstLine && idxLine == 0) {
+                    output.append(indentation);
+                }
+                else output.append(subIndentation);
+                output.append(line.trim()).append("\n");
+            }
+	    }
 	}
 	
 	/* (non-Javadoc)
