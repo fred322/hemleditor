@@ -70,6 +70,8 @@ local ret = {
         {section %title=SubSection number 2
             Test avec du texte ecrit ici
             Vraiment proche du coté
+            {p texte dans un paragraphe
+                sur plusieurs lignes}
         }
         {section %title=SubSection number 3}
         {section %title=SubSection number 4
