@@ -32,6 +32,13 @@
          {section %title=cao le grand
              {section %title=Sub1
                  {section %title=Sub4 }
+ {#
+ @startuml
+ component comp1
+ component comp2
+ comp1 -> comp2
+ @enduml
+ #}
              }
              
              {code %language=lua   
@@ -81,7 +88,13 @@ Vraiment proche du coté
             Ceci est une sous section numero 4
                 - element1
                 - element2
+                the texte of the element
                     - element21
+                    the text of the element21
+                    -elemnt22
+                    the text of the element22
+                    is this texte :=)
+                       totototoo
                   -elements33
                   - element3
         }

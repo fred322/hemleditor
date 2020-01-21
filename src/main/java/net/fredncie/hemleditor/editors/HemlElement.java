@@ -263,12 +263,12 @@ public class HemlElement {
                                 System.err.println("HEML error with items in block: " + getLabel());
                             }
                         }
-                        if (itemLevel > 0) {
-                            output.append(String.format("%" + (itemLevel * 4) + "s", ""));                            
-                        }
-                        else itemLevel = 0;
                     }
-                    
+
+                    if (itemLevel > 0) {
+                        output.append(String.format("%" + (itemLevel * 4) + "s", ""));                            
+                    }
+                    else itemLevel = 0;
                     line = trimmedLine;
                 }                
                 output.append(line).append("\n");
