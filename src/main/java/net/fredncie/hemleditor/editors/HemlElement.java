@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Stack;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -200,26 +201,27 @@ public class HemlElement {
         for (HemlElement child : children) {
             long childOffset = child.getOffset() - getOffset();
             if (!"kw".equals(child.getQualifier()) && !"i".equals(child.getQualifier()) && !"em".equals(child.getQualifier())) {
+                String beforeText = fText.substring(0, (int)childOffset);
+                int lastNewLine = beforeText.lastIndexOf('\n');
                 if (currentOffset < childOffset) {
                     String substring = fText.substring((int)currentOffset, (int)childOffset);
-                    writeText(substring, output, firstLineIndentationStr, previousIndentation, firstLine, false);
+                    writeText(substring, output, firstLineIndentationStr, previousIndentation, firstLine, false, lastNewLine != -1);
                 }
                 firstLine = false;
-
-                String beforeText = fText.substring(0, (int)childOffset);
-                int childPreviousIndent = Math.max(0, (int)childOffset - (beforeText.lastIndexOf('\n') + 1));
+                
+                int childPreviousIndent = Math.max(0, (int)childOffset - (lastNewLine + 1));
                 child.write(output, indentation + 4, childPreviousIndent);
                 currentOffset = childOffset + child.getTextLength();                
             }
         }
         if (currentOffset < getTextLength()) {
             String substring = fText.substring((int)currentOffset);
-            writeText(substring, output, firstLineIndentationStr, previousIndentation, firstLine, true);            
+            writeText(substring, output, firstLineIndentationStr, previousIndentation, firstLine, true, true);            
         }
 	}
 	
 	private void writeText(String texte, StringBuilder output, String indentation, 
-	        int previousIndent, boolean hasFirstLine, boolean hasLastLine) {
+	        int previousIndent, boolean hasFirstLine, boolean hasLastLine, boolean lastNewLine) {
 	    String subIndentation = indentation;
 	    boolean keepSpaces = false;
 	    if (!"#".equals(getQualifier()) && !"!".equals(getQualifier())) {
@@ -233,8 +235,7 @@ public class HemlElement {
 	        }
 	        keepSpaces = true;
 	    }
-	    int itemLevel = 0;
-	    int previousItemSpacesCount = 0;
+	    Stack<Integer> itemsSpaceCount = new Stack<>();
 	    String[] lines = texte.replace("\t", DEFAULT_INDENT).split("\n");
 	    for (int idxLine = 0; idxLine < lines.length; idxLine++) {
 	        String line = lines[idxLine];
@@ -242,7 +243,10 @@ public class HemlElement {
             if (!trimmed.isEmpty()) {
                 boolean firstLine = hasFirstLine && idxLine == 0;
                 if (hasLastLine && idxLine == lines.length - 1 && trimmed.length() <= 2 || firstLine) {
-                    output.append(indentation);
+                    if (firstLine && output.charAt(output.length() - 1) != '\n') {
+                        output.append(" ");
+                    }
+                    else output.append(indentation);
                 }
                 else output.append(subIndentation);
                 
@@ -252,26 +256,28 @@ public class HemlElement {
                     String trimmedLine = line.replaceAll("^\\s*", "");
                     int leftSpacesCount = line.length() - trimmedLine.length();
                     if (trimmedLine.startsWith("-")) {
-                        if (leftSpacesCount > previousItemSpacesCount) {
-                            itemLevel++;
-                            previousItemSpacesCount = leftSpacesCount;
+                        if (itemsSpaceCount.empty() || leftSpacesCount > itemsSpaceCount.peek()) {
+                            itemsSpaceCount.add(leftSpacesCount);
                         }
-                        else if (leftSpacesCount < previousItemSpacesCount) {
-                            itemLevel--;
-                            previousItemSpacesCount = leftSpacesCount;
-                            if (itemLevel < 0) {
-                                System.err.println("HEML error with items in block: " + getLabel());
+                        else if (leftSpacesCount < itemsSpaceCount.peek()) {
+                            while (!itemsSpaceCount.empty() && leftSpacesCount < itemsSpaceCount.peek()) {
+                                itemsSpaceCount.pop();
                             }
+                            if (!itemsSpaceCount.empty()) itemsSpaceCount.pop();
+                            itemsSpaceCount.add(leftSpacesCount);
                         }
+                    }
+                    else if (!itemsSpaceCount.empty() && leftSpacesCount < itemsSpaceCount.peek()) { 
+                        itemsSpaceCount.clear();
                     }
 
-                    if (itemLevel > 0) {
-                        output.append(String.format("%" + (itemLevel * 4) + "s", ""));                            
+                    if (!itemsSpaceCount.empty()) {
+                        output.append(String.format("%" + (itemsSpaceCount.size() * 4) + "s", ""));                            
                     }
-                    else itemLevel = 0;
                     line = trimmedLine;
-                }                
-                output.append(line).append("\n");
+                }
+                output.append(line);
+                if(lastNewLine) output.append("\n");
             }
 	    }
 	}

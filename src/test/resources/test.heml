@@ -1,5 +1,4 @@
-{?set 
-    %encoding=utf-8 %xsd=defaultHEML.xsd
+{?set %encoding=utf-8 %xsd=defaultHEML.xsd
     %language=french}
 {document 
      {section %other=tot %title=Toto1
@@ -60,9 +59,7 @@
          {section %title=Nouvelle section
             {section %title=Sub Section
             {table
-                {tr
-                    {th col1} {th col2} {th col3}
-                }
+                {tr {th col1} {th col2} {th col3}}
                 {?table
                 val1 % val2 % val3
                 val4 % val5 % val6
@@ -82,6 +79,10 @@
 Vraiment proche du coté
             {p texte dans un paragraphe 
             sur plusieurs lignes}
+            Suite du texte
+              Ttess
+            {p un autre paragraoh}
+            Fin du texte.
         }
         {section %title=SubSection number 3}
         {section %title=SubSection number 4
@@ -95,6 +96,9 @@ Vraiment proche du coté
                     the text of the element22
                     is this texte :=)
                        totototoo
+                    -element23
+                        -sousElement23
+                        - sousElement244
                   -elements33
                   - element3
         }
