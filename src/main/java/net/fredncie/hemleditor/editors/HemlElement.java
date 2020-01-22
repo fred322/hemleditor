@@ -201,15 +201,16 @@ public class HemlElement {
         for (HemlElement child : children) {
             long childOffset = child.getOffset() - getOffset();
             if (!"kw".equals(child.getQualifier()) && !"i".equals(child.getQualifier()) && !"em".equals(child.getQualifier())) {
-                String beforeText = fText.substring(0, (int)childOffset);
-                int lastNewLine = beforeText.lastIndexOf('\n');
+                String beforeText = fText.substring((int)currentOffset, (int)childOffset);
+                int lastNewLineRel = beforeText.lastIndexOf('\n');
+                int lastNewLine = (int) (currentOffset + lastNewLineRel);
                 if (currentOffset < childOffset) {
-                    String substring = fText.substring((int)currentOffset, (int)childOffset);
-                    writeText(substring, output, firstLineIndentationStr, previousIndentation, firstLine, false, lastNewLine != -1);
+                    writeText(beforeText, output, firstLineIndentationStr, previousIndentation, firstLine, false, lastNewLineRel != -1);
                 }
                 firstLine = false;
                 
-                if (lastNewLine == -1 && output.charAt(output.length() - 1) == '\n') {
+                // if there is no newline before, remove the newline in the output string.
+                if (lastNewLineRel == -1 && output.charAt(output.length() - 1) == '\n') {
                     output.setLength(output.length() - 1);
                 }
                 
@@ -247,15 +248,14 @@ public class HemlElement {
             if (!trimmed.isEmpty()) {
                 boolean firstLine = hasFirstLine && idxLine == 0;
                 if (hasLastLine && idxLine == lines.length - 1 && trimmed.length() <= 2 || firstLine) {
-                    if (firstLine && output.charAt(output.length() - 1) != '\n') {
+                    if (firstLine && output.length() > 0 && output.charAt(output.length() - 1) != '\n') {
                         output.append(" ");
                     }
                     else output.append(indentation);
                 }
                 else output.append(subIndentation);
                 
-                if (keepSpaces && !firstLine) line = line.substring(previousIndent);
-                else {
+                if (!keepSpaces || firstLine) {
                     line = line.replaceAll("\\s*$", "");
                     String trimmedLine = line.replaceAll("^\\s*", "");
                     int leftSpacesCount = line.length() - trimmedLine.length();
@@ -278,8 +278,10 @@ public class HemlElement {
                     if (!itemsSpaceCount.empty()) {
                         output.append(String.format("%" + (itemsSpaceCount.size() * 4) + "s", ""));                            
                     }
-                    line = trimmedLine;
+                    line = trimmedLine;                    
                 }
+                else if (line.length() > previousIndent) line = line.substring(previousIndent);
+                
                 output.append(line);
                 if(lastNewLine) output.append("\n");
             }
