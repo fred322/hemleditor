@@ -209,6 +209,10 @@ public class HemlElement {
                 }
                 firstLine = false;
                 
+                if (lastNewLine == -1 && output.charAt(output.length() - 1) == '\n') {
+                    output.setLength(output.length() - 1);
+                }
+                
                 int childPreviousIndent = Math.max(0, (int)childOffset - (lastNewLine + 1));
                 child.write(output, indentation + 4, childPreviousIndent);
                 currentOffset = childOffset + child.getTextLength();                
