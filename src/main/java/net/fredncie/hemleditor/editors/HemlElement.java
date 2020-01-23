@@ -27,6 +27,7 @@ public class HemlElement {
 	private static final Pattern CommentBlockEndPattern = Pattern.compile("(#\\})");
     private static final Pattern CodeBlockEndPattern = Pattern.compile("(!\\})");
     private static final Pattern attributesPattern = Pattern.compile("%([^%]+)=([^%}]+)");
+    private static final List<String> inlineElements = Arrays.asList("em", "kw", "i", "a", "xref");
 	private HemlElement fParent;
 	private String fText;
 	private String fQualifier;
@@ -200,7 +201,7 @@ public class HemlElement {
         }
         for (HemlElement child : children) {
             long childOffset = child.getOffset() - getOffset();
-            if (!"kw".equals(child.getQualifier()) && !"i".equals(child.getQualifier()) && !"em".equals(child.getQualifier())) {
+            if (!inlineElements.contains(child.getQualifier())) {
                 String beforeText = fText.substring((int)currentOffset, (int)childOffset);
                 int lastNewLineRel = beforeText.lastIndexOf('\n');
                 int lastNewLine = (int) (currentOffset + lastNewLineRel);
@@ -312,6 +313,7 @@ public class HemlElement {
             }
             int currentIdx = 0;
             if (fQualifier.startsWith("#")) {
+                fQualifier = "#";
                 Matcher endCode = CommentBlockEndPattern.matcher(fText);
                 if (endCode.find()) {
                     fText = fText.substring(0, endCode.end());              
@@ -319,6 +321,7 @@ public class HemlElement {
                 else ret = false;
             }
             else if (fQualifier.startsWith("!")) {
+                fQualifier = "!";
                 Matcher endCode = CodeBlockEndPattern.matcher(fText);
                 if (endCode.find()) {
                     fText = fText.substring(0, endCode.end());              

@@ -10,7 +10,7 @@
             }
             !}
          {em italic %title=tptp}
-         {# plantml src=toto.log
+         {#plantml src=toto.log
          class rata {
          }
          class blob {
@@ -25,7 +25,7 @@
          {section %title=too1
              {section %title=It is the foo
                 J'ecrit un test avec des {kw tes} et des test 
-                pour voir ce qu'il faut avec.     
+                pour voir ce {xref crossRref} qu'il faut avec.     
              }
          }
          {section %title=cao le grand
@@ -55,7 +55,7 @@
                 {}
              }!}}
          }
-         {# un petit commentaire #}
+         {#un petit commentaire #}
          {section %title=Nouvelle section
             {section %title=Sub Section
             {table
@@ -84,8 +84,13 @@
         {section %title=SubSection number 2
             Test avec du texte ecrit ici
 Vraiment proche du coté
+    {kw keyword}
+            {code %language=lua
+            {!require "something";
+            a+b!}
+            }
             {p texte dans un paragraphe 
-            sur plusieurs lignes}
+            sur plusieurs {kw superbe} lignes}
             Suite du texte
               Ttess
             {p un autre paragraoh}
@@ -96,7 +101,7 @@ Vraiment proche du coté
             Ceci est une sous section numero 4
                 - element1
                 - element2
-                the texte of the element
+                the texte of the {a link} element
                     - element21
                     the text of the element21
                     -elemnt22
