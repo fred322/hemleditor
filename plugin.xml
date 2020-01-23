@@ -52,14 +52,24 @@
     </extension>
    <extension
          point="org.eclipse.ui.menus">
-         <menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-               <menu id="fileMenu" label="Heml">
+         <menuContribution locationURI="popup:#AbstractTextEditorContext">
+               <menu label="Heml" id="net.fredncie.hemleditor.menu.Heml">
                     <command commandId="net.fredncie.hemleditor.command.format" label="format" tooltip="Format the document" style="push"/>
+                    <visibleWhen>
+                      <with variable="activeEditorId">
+                          <equals value="net.fredncie.hemleditor.editors.HemlEditor" />
+                      </with>
+                    </visibleWhen>
                </menu>
          </menuContribution>
-         <menuContribution locationURI="menu:edit?after=additions">
-               <menu id="fileMenu" label="Heml">
+         <menuContribution locationURI="menu:org.eclipse.ui.main.menu?after=edit">
+               <menu id="net.fredncie.hemleditor.menu.Source" label="Source">
                     <command commandId="net.fredncie.hemleditor.command.format" label="format" tooltip="Format the document" style="push"/>
+                    <visibleWhen>
+                      <with variable="activeEditorId">
+                          <equals value="net.fredncie.hemleditor.editors.HemlEditor" />
+                      </with>
+                    </visibleWhen>
                </menu>
          </menuContribution>
     </extension>
