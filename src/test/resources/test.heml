@@ -43,6 +43,8 @@
              {code %language=lua   
              {! --this is a lua code.
              astre:open();
+             -- test newline
+             
              local ret = {
                 {}
              }!}

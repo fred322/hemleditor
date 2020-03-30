@@ -243,10 +243,12 @@ public class HemlElement {
 	    }
 	    Stack<Integer> itemsSpaceCount = new Stack<>();
 	    String[] lines = texte.replace("\t", DEFAULT_INDENT).split("\n");
+	    System.out.println("Write lines for qualifier: " + getQualifier());
 	    for (int idxLine = 0; idxLine < lines.length; idxLine++) {
 	        String line = lines[idxLine];
             String trimmed = line.trim();
-            if (!trimmed.isEmpty()) {
+            // if code section, keep all empty lines.
+            if (!trimmed.isEmpty() || "!".equals(getQualifier())) {
                 boolean firstLine = hasFirstLine && idxLine == 0;
                 if (hasLastLine && idxLine == lines.length - 1 && trimmed.length() <= 2 || firstLine) {
                     if (firstLine && output.length() > 0 && output.charAt(output.length() - 1) != '\n') {
@@ -281,7 +283,7 @@ public class HemlElement {
                     }
                     line = trimmedLine;                    
                 }
-                else if (line.length() > previousIndent) line = line.substring(previousIndent);
+                else if (line.length() >= previousIndent) line = line.substring(previousIndent);
                 
                 output.append(line);
                 if(lastNewLine) output.append("\n");
