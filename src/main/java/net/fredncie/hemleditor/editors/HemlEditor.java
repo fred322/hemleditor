@@ -1,9 +1,11 @@
 package net.fredncie.hemleditor.editors;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -32,7 +34,8 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 
 	private HemlContentOutlinePage fOutlinePage;
 	private ProjectionAnnotationModel fAnnotationModel;
-	private Annotation[] fCurrentAnnotations;
+	//private Annotation[] fCurrentAnnotations;
+	private final List<Entry<Annotation, Position>> fMapPosAnnotations = new ArrayList<Map.Entry<Annotation,Position>>();
 	private HemlElement fMainHemlElement;
     private boolean fUpdating = false;
     private String fDocContentForUpdate = null;
@@ -170,17 +173,32 @@ public class HemlEditor extends TextEditor implements ISelectionChangedListener 
 			List<Position> positions = new ArrayList<Position>();
 			mainHeml.generatePosition(positions);
 			
-			Map<Annotation, Position> mapAnnotations = new HashMap<>();
-			for (Position pos : positions) {
-				ProjectionAnnotation annotation = new ProjectionAnnotation();
-				mapAnnotations.put(annotation, pos);
+			List<Annotation> modifications = new ArrayList<Annotation>();
+			int max = Math.min(positions.size(), fMapPosAnnotations.size());
+			int idx = 0;
+			for (; idx < max; idx++) {
+				Position position = positions.get(idx);
+				Entry<Annotation, Position> existing = fMapPosAnnotations.get(idx);
+				if (existing.getValue().getLength() != position.getLength() || existing.getValue().getOffset() != position.getOffset()) {
+					existing.getValue().setLength(position.getLength());
+					existing.getValue().setOffset(position.getOffset());
+					modifications.add(existing.getKey());
+				}
 			}
-			Annotation[] annotations = mapAnnotations.keySet().stream().toArray(Annotation[]::new);
+			Map<Annotation, Position> newPositions = new HashMap<Annotation, Position>();
+			for (; idx < positions.size(); idx++) {
+				ProjectionAnnotation annotation = new ProjectionAnnotation();
+				newPositions.put(annotation, positions.get(idx));
+				fMapPosAnnotations.add(new AbstractMap.SimpleEntry<>(annotation, positions.get(idx)));
+			}
+			List<Annotation> deletedAnnotations = new ArrayList<Annotation>();
+			for (int idx2 = fMapPosAnnotations.size() - 1; idx2 >= idx; idx2--) {
+				deletedAnnotations.add(fMapPosAnnotations.remove(idx2).getKey());
+			}
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					fAnnotationModel.modifyAnnotations(fCurrentAnnotations, mapAnnotations, null);
-					fCurrentAnnotations = annotations;					
+					fAnnotationModel.modifyAnnotations(deletedAnnotations.stream().toArray(Annotation[]::new), newPositions, modifications.stream().toArray(Annotation[]::new));
 				}
 			});
 		}
