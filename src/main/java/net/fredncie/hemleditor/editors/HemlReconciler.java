@@ -7,9 +7,11 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.EndOfLineRule;
 import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
 import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.text.rules.WordPatternRule;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -46,7 +48,18 @@ public class HemlReconciler extends PresentationReconciler implements IPropertyC
             new SingleLineRule("{em ", "}", emToken),
             new SingleLineRule("{", " ", tagToken),
             new SingleLineRule("%", "=", parameterToken),
-            new SingleLineRule("}", " ", tagToken, '\\', true)
+            new WordPatternRule(new IWordDetector() {
+				@Override
+				public boolean isWordStart(char c) {
+					return c == '}';
+				}
+				
+				@Override
+				public boolean isWordPart(char c) {
+					// the length is 1
+					return false;
+				}
+			}, "}", "", tagToken)
         };
         
         scanner.setRules(rules);
