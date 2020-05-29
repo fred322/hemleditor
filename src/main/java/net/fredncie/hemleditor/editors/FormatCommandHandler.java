@@ -27,7 +27,7 @@ public class FormatCommandHandler extends AbstractHandler {
             String docValue = document.get();
             HemlElement element = HemlElement.create(docValue);
             StringBuilder output = new StringBuilder(docValue.length());
-            element.write(output, 0);
+            element.write(output, new HemlIndenter());
             
             document.set(output.toString());
         }

@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Stack;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,8 +18,6 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.text.Position;
 
 public class HemlElement {
-    private static final String DEFAULT_INDENT = String.format("%4s", "");
-    
 	private static final Pattern FirstLinePattern = Pattern.compile("^\\{\\?[^\\}]*\\}");
 	private static final Pattern QualifierPattern = Pattern.compile("^[^#\\{]*\\{(\\S+)([^\\n]*%(?:title|language)=([^%}\\n]+))?[^\\n]*$", Pattern.MULTILINE);
 	private static final Pattern EndBlockPattern = Pattern.compile("^[^#\\}]*(\\})[^\\n]*$", Pattern.MULTILINE);
@@ -183,15 +180,14 @@ public class HemlElement {
 		}
 	}
 
-    public void write(StringBuilder output, int indentation) {
-        write(output, indentation, 0);
+    public void write(StringBuilder output, HemlIndenter indentation) {
+        write(output, indentation, 0, false);
     }
     
-	public void write(StringBuilder output, int indentation, int previousIndentation) {
+	public void write(StringBuilder output, HemlIndenter indentation, int previousIndentation, boolean inline) {
         List<HemlElement> children = fChildren != null ? new ArrayList<>(Arrays.asList(fChildren)) : new ArrayList<>();
+        HemlElementWriteProperty hemlElementWriteProperty = new HemlElementWriteProperty(indentation, inline);
         long currentOffset = 0;
-        String firstLineIndentationStr = indentation > 0 ? String.format("%" + indentation + "s", "") : "";
-        boolean firstLine = true;
         if (output.length() == 0 && !fDocOptions.isEmpty()) {
             output.append("{?set");
             for (Entry<String, String> attribute : fDocOptions.entrySet()) {
@@ -204,91 +200,104 @@ public class HemlElement {
             if (!inlineElements.contains(child.getQualifier())) {
                 String beforeText = fText.substring((int)currentOffset, (int)childOffset);
                 int lastNewLineRel = beforeText.lastIndexOf('\n');
+                boolean beforeTextEndsWithNewLine = beforeText.replaceAll("[ \t]", "").endsWith("\n");
                 int lastNewLine = (int) (currentOffset + lastNewLineRel);
+                int childPreviousIndent = Math.max(0, (int)childOffset - (lastNewLine + 1));
                 if (currentOffset < childOffset) {
-                    writeText(beforeText, output, firstLineIndentationStr, previousIndentation, firstLine, false, lastNewLineRel != -1);
+                    hemlElementWriteProperty.setNextHasNewLine(beforeTextEndsWithNewLine);
+                    writeText(beforeText, output, hemlElementWriteProperty);
                 }
-                firstLine = false;
+                if (!hemlElementWriteProperty.isSubIndentAdded()) {
+                    indentation.addIndent(childPreviousIndent);
+                    hemlElementWriteProperty.setSubIndentAdded(true);
+                }
+                hemlElementWriteProperty.setFirstLineRead(true);
                 
                 // if there is no newline before, remove the newline in the output string.
                 if (lastNewLineRel == -1 && output.charAt(output.length() - 1) == '\n') {
                     output.setLength(output.length() - 1);
                 }
-                
-                int childPreviousIndent = Math.max(0, (int)childOffset - (lastNewLine + 1));
-                child.write(output, indentation + 4, childPreviousIndent);
+
+                indentation.removeIfLesser(childPreviousIndent);
+                child.write(output, indentation.createNew(childPreviousIndent), childPreviousIndent, !beforeTextEndsWithNewLine);
                 currentOffset = childOffset + child.getTextLength();                
             }
         }
         if (currentOffset < getTextLength()) {
             String substring = fText.substring((int)currentOffset);
-            writeText(substring, output, firstLineIndentationStr, previousIndentation, firstLine, true, true);            
+            hemlElementWriteProperty.setNextHasLastLine(true);
+            hemlElementWriteProperty.setNextHasNewLine(true);
+            writeText(substring, output, hemlElementWriteProperty);            
         }
 	}
 	
-	private void writeText(String texte, StringBuilder output, String indentation, 
-	        int previousIndent, boolean hasFirstLine, boolean hasLastLine, boolean lastNewLine) {
-	    String subIndentation = indentation;
+	private String writeText(String texte, StringBuilder output, HemlElementWriteProperty property) {
+		String lastIndent = "";
 	    boolean keepSpaces = false;
-	    if (!"#".equals(getQualifier()) && !"!".equals(getQualifier())) {
-	        subIndentation += DEFAULT_INDENT;
-	    }
-	    else {
+	    HemlIndenter indentation = property.getIndenter();
+	    if ("#".equals(getQualifier()) || "!".equals(getQualifier())) {
             // the code must be at the indentation 0
 	        if ("!".equals(getQualifier())) {
-	            indentation = "";
-	            subIndentation = "";
+	            indentation = new HemlIndenter();
 	        }
 	        keepSpaces = true;
 	    }
-	    Stack<Integer> itemsSpaceCount = new Stack<>();
-	    String[] lines = texte.replace("\t", DEFAULT_INDENT).split("\n");
-	    System.out.println("Write lines for qualifier: " + getQualifier());
+	    String[] lines = HemlIndenter.removeTabulation(texte).split("\n");
 	    for (int idxLine = 0; idxLine < lines.length; idxLine++) {
 	        String line = lines[idxLine];
             String trimmed = line.trim();
             // if code section, keep all empty lines.
             if (!trimmed.isEmpty() || "!".equals(getQualifier())) {
-                boolean firstLine = hasFirstLine && idxLine == 0;
-                if (hasLastLine && idxLine == lines.length - 1 && trimmed.length() <= 2 || firstLine) {
+                boolean firstLine = !property.isFirstLineRead() && idxLine == 0;
+                // last line of the current text.
+                boolean localLastLine = idxLine == lines.length - 1;
+                // last line of all the block.
+                boolean lastLine = property.isNextHasLastLine() && localLastLine;
+                if (property.isNextHasLastLine() && idxLine == lines.length - 1 && trimmed.length() <= 2 || firstLine) {
                     if (firstLine && output.length() > 0 && output.charAt(output.length() - 1) != '\n') {
                         output.append(" ");
                     }
-                    else output.append(indentation);
+                    else if (!firstLine && lastLine && !keepSpaces) {
+                        indentation.clearIndents();
+                    }
                 }
-                else output.append(subIndentation);
                 
                 if (!keepSpaces || firstLine) {
                     line = line.replaceAll("\\s*$", "");
                     String trimmedLine = line.replaceAll("^\\s*", "");
                     int leftSpacesCount = line.length() - trimmedLine.length();
-                    if (trimmedLine.startsWith("-")) {
-                        if (itemsSpaceCount.empty() || leftSpacesCount > itemsSpaceCount.peek()) {
-                            itemsSpaceCount.add(leftSpacesCount);
-                        }
-                        else if (leftSpacesCount < itemsSpaceCount.peek()) {
-                            while (!itemsSpaceCount.empty() && leftSpacesCount < itemsSpaceCount.peek()) {
-                                itemsSpaceCount.pop();
-                            }
-                            if (!itemsSpaceCount.empty()) itemsSpaceCount.pop();
-                            itemsSpaceCount.add(leftSpacesCount);
-                        }
+                    
+                    // if not firstline and (not a last line or more than only '}') and the sub indentation not added yet
+                    // => insert an additionnal indentation inside the block.
+                    if (!firstLine && (!lastLine || trimmedLine.length() > 2) && !property.isSubIndentAdded()) {
+                        indentation.addIndent(leftSpacesCount);
+                        property.setSubIndentAdded(true);
                     }
-                    else if (!itemsSpaceCount.empty() && leftSpacesCount < itemsSpaceCount.peek()) { 
-                        itemsSpaceCount.clear();
+                    
+                    if (trimmedLine.startsWith("-")) {
+                        // if start with "-", compute the new indentation.
+                        indentation.computeIndent(leftSpacesCount);                        
+                    }
+                    else if (!firstLine) {
+                        // the first line don't have indentation
+                        indentation.removeIfLesser(leftSpacesCount);
                     }
 
-                    if (!itemsSpaceCount.empty()) {
-                        output.append(String.format("%" + (itemsSpaceCount.size() * 4) + "s", ""));                            
+                    if (!firstLine || !property.isInline()) {
+                        output.append(indentation.getCurrentIndentStr());                        
                     }
-                    line = trimmedLine;                    
+                    line = trimmedLine;
                 }
-                else if (line.length() >= previousIndent) line = line.substring(previousIndent);
+                else if (line.length() >= property.getIndenter().getOriginalIndentSize()) {
+                    output.append(indentation.getCurrentIndentStr());
+                    line = line.substring(property.getIndenter().getOriginalIndentSize());
+                }
                 
                 output.append(line);
-                if(lastNewLine) output.append("\n");
+                if(!localLastLine || property.isNextHasNewLine()) output.append("\n");
             }
 	    }
+	    return lastIndent;
 	}
 	
 	/* (non-Javadoc)

@@ -104,7 +104,8 @@ Vraiment proche du coté
                 - element1
                 - element2
                 the texte of the {a link} element
-                    - element21
+                    - {p element21}
+                    {p one text in a p}
                     the text of the element21
                     -elemnt22
                     the text of the element22
@@ -112,9 +113,17 @@ Vraiment proche du coté
                        totototoo
                     -element23
                         -sousElement23
+                        {p another sub text
+                        in a sousElement}
+                        {p another paragraphe}
                         - sousElement244
                   -elements33
                   - element3
+            a text after list
+            {p paragraphe after list, check if heml work well with that}
+               - sub
+               - sub2
+                    - sub3
         }
         {?include %src=other.lua}
      }

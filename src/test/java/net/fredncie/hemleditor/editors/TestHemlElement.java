@@ -74,7 +74,7 @@ public class TestHemlElement {
 
         List<Position> positions = new ArrayList<Position>();
         document.generatePosition(positions);
-        Assert.assertEquals(positions.size(), 30);
+        Assert.assertEquals(positions.size(), 31);
 	}
 	
 	@Test
@@ -125,7 +125,7 @@ public class TestHemlElement {
 
         File outputFile = new File("output.heml");
         StringBuilder output = new StringBuilder();
-        document.write(output, 0);
+        document.write(output, new HemlIndenter());
         Files.write(output.toString(), outputFile, StandardCharsets.UTF_8);
         
         Assert.assertEquals(java.nio.file.Files.readAllBytes(outputFile.toPath()),
