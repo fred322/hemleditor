@@ -7,6 +7,10 @@ local ret = {
    {}
 }
 !}
+        {definitions %title=Sigles
+            {def %entry=Toto1# %%text toto1}
+            {def %entry=Toto2 %%text toto2}
+        }
         {em italic %title=tptp}
         {#plantml src=toto.log
         class rata {
@@ -122,6 +126,8 @@ a+b!}
                 - sub
                 - sub2
                     - sub3
+                a text after list
+                -SUB4
         }
         {?include %src=other.lua}
     }

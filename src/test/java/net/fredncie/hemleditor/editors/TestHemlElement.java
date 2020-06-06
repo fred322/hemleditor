@@ -37,15 +37,16 @@ public class TestHemlElement {
 		Assert.assertEquals(toto1.getLabel(), "section (Toto1)");
         Assert.assertEquals(section2.getLabel(), "section (Section 2)");
         
-        Assert.assertEquals(toto1.getChildren().length, 7);
+        Assert.assertEquals(toto1.getChildren().length, 8);
         Assert.assertEquals(toto1.getChildren()[0].getLabel(), "code block");
-        Assert.assertEquals(toto1.getChildren()[1].getLabel(), "em (tptp)");
-        Assert.assertEquals(toto1.getChildren()[2].getLabel(), "comment");
-        Assert.assertEquals(toto1.getChildren()[3].getLabel(), "section (too1)");
-        HemlElement caoLeGrand = toto1.getChildren()[4];
+        Assert.assertEquals(toto1.getChildren()[1].getLabel(), "definitions (Sigles)");
+        Assert.assertEquals(toto1.getChildren()[2].getLabel(), "em (tptp)");
+        Assert.assertEquals(toto1.getChildren()[3].getLabel(), "comment");
+        Assert.assertEquals(toto1.getChildren()[4].getLabel(), "section (too1)");
+        HemlElement caoLeGrand = toto1.getChildren()[5];
         Assert.assertEquals(caoLeGrand.getLabel(), "section (cao le grand)");
-        Assert.assertEquals(toto1.getChildren()[5].getLabel(), "comment");
-        HemlElement nouvellSect = toto1.getChildren()[6];
+        Assert.assertEquals(toto1.getChildren()[6].getLabel(), "comment");
+        HemlElement nouvellSect = toto1.getChildren()[7];
         Assert.assertEquals(nouvellSect.getLabel(), "section (Nouvelle section)");
         
         Assert.assertEquals(caoLeGrand.getChildren().length, 3);
@@ -74,7 +75,7 @@ public class TestHemlElement {
 
         List<Position> positions = new ArrayList<Position>();
         document.generatePosition(positions);
-        Assert.assertEquals(positions.size(), 31);
+        Assert.assertEquals(positions.size(), 32);
 	}
 	
 	@Test
