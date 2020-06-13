@@ -278,7 +278,7 @@ public class HemlElement {
                     
                     if (trimmedLine.startsWith("-")) {
                         // if start with "-", compute the new indentation.
-                        indentation.computeIndent(leftSpacesCount);                        
+                        indentation.computeIndent(leftSpacesCount, property.isSubIndentAdded());                        
                     }
                     else if (!firstLine) {
                         // the first line don't have indentation

@@ -30,6 +30,29 @@ local ret = {
             {section %title=It is the foo
                 J'ecrit un test avec des {kw tes} et des test
                 pour voir ce {xref crossRref} qu'il faut avec.
+                    - list element1
+                    Content of list element1
+                    - list element2
+                    Content of list element2
+                    Text add
+            }
+            {section %title=Its foo things
+                    - List element1
+                    - List element2
+                    Patapouf
+            }
+            {section %title=Its foo things
+                    - List element1
+                    - List element2
+                Patapouf
+            }
+            {section %title=Its foo things
+                Plein de choses
+                    - List element1
+                Pas plein de choses
+                    - List element2
+                    Patapouf
+                Hein !!
             }
         }
         {section %title=cao le grand

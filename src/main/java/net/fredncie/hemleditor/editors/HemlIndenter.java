@@ -30,9 +30,12 @@ public class HemlIndenter {
         return text.replace("\t", DEFAULT_INDENT); 
     }
     
-    public boolean computeIndent(int previousIndent) {
+    public boolean computeIndent(int previousIndent, boolean subIndentAdded) {
         boolean changed = false;
-        if (this.itemsSpaceCount.empty() || previousIndent > this.itemsSpaceCount.peek()) {
+        int originalCount = this.originalCount;
+        if (subIndentAdded) originalCount++;
+        if (this.itemsSpaceCount.empty() || previousIndent > this.itemsSpaceCount.peek() || 
+                (this.itemsSpaceCount.size() == originalCount && previousIndent == this.itemsSpaceCount.peek())) {
             this.itemsSpaceCount.add(previousIndent);
             changed = true;
         }
@@ -62,8 +65,8 @@ public class HemlIndenter {
         boolean ret = false;
         // +1 to keep the subindentation in a block
         // '<=' to remove the duplicates
-        if (this.itemsSpaceCount.size() > this.originalCount + 1 && previousIndent <= this.itemsSpaceCount.peek()) {
-            while (this.itemsSpaceCount.size() > this.originalCount + 1 && previousIndent <= this.itemsSpaceCount.peek()) {
+        if (this.itemsSpaceCount.size() > this.originalCount + 1 && previousIndent < this.itemsSpaceCount.peek()) {
+            while (this.itemsSpaceCount.size() > this.originalCount + 1 && previousIndent < this.itemsSpaceCount.peek()) {
                 this.itemsSpaceCount.pop();
             }
             if (this.itemsSpaceCount.empty() || previousIndent > this.itemsSpaceCount.peek())

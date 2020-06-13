@@ -75,7 +75,7 @@ public class TestHemlElement {
 
         List<Position> positions = new ArrayList<Position>();
         document.generatePosition(positions);
-        Assert.assertEquals(positions.size(), 32);
+        Assert.assertEquals(positions.size(), 35);
 	}
 	
 	@Test
