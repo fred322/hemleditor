@@ -233,6 +233,8 @@ public class HemlElement {
 	
 	private String writeText(String texte, StringBuilder output, HemlElementWriteProperty property) {
 		String lastIndent = "";
+		// to keep spaces and newlines.
+		// for code block and comment block
 	    boolean keepSpaces = false;
 	    HemlIndenter indentation = property.getIndenter();
 	    if ("#".equals(getQualifier()) || "!".equals(getQualifier())) {
@@ -246,8 +248,8 @@ public class HemlElement {
 	    for (int idxLine = 0; idxLine < lines.length; idxLine++) {
 	        String line = lines[idxLine];
             String trimmed = line.trim();
-            // if code section, keep all empty lines.
-            if (!trimmed.isEmpty() || "!".equals(getQualifier())) {
+            // if code and comment section, keep all empty lines.
+            if (!trimmed.isEmpty() || keepSpaces) {
                 boolean firstLine = !property.isFirstLineRead() && idxLine == 0;
                 // last line of the current text.
                 boolean localLastLine = idxLine == lines.length - 1;

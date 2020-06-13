@@ -17,11 +17,14 @@ local ret = {
         }
         class blob {
         }
+        
         #{lol}
+        
         class naboo {
            attribute1: bool   
            method1 void
         }
+        
         #}
         {section %title=too1
             {section %title=It is the foo

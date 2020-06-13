@@ -19,7 +19,9 @@
          }
          class blob {
          }
+         
          #{lol}
+         
          class naboo {
             attribute1: bool   
             method1 void
