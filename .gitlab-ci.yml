@@ -1,12 +1,7 @@
 stages:
-    - build
     - test
     - deploy
     - tag
-
-build:
-    stage: build
-    script: gradle build -x test
 
 test: 
     stage: test
@@ -23,9 +18,10 @@ deploy:
 tag:
     stage: tag
     script:
-        - git remote set-url origin git@$CI_SERVER_HOST:$CI_PROJECT_PATH
-        - git checkout $CI_COMMIT_REF_NAME
-        - gradle tag 
+        - export
+        - echo "Change to $CI_SERVER_HOST $CI_PROJECT_PATH"
+        - git clone ssh://git@$CI_SERVER_HOST/$CI_PROJECT_PATH.git _tmp
+        - cd _tmp/hemleditor_parent && gradle tag
     when: manual
     only: 
         - branches
