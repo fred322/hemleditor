@@ -1,0 +1,23 @@
+buildscript {
+  ext {
+     dependencyManagementPluginVersion = '0.6.0.RELEASE'
+   	 projectName = "HemlEditor"
+  }
+    
+  repositories {  
+     maven { url "https://plugins.gradle.org/m2/" }
+     mavenCentral()
+     mavenLocal()
+  }
+  dependencies {
+     classpath "io.spring.gradle:dependency-management-plugin:${dependencyManagementPluginVersion}"
+  }
+}
+
+apply plugin: "java"
+
+repositories {  
+    maven { url "https://plugins.gradle.org/m2/" }
+    mavenCentral()
+    mavenLocal()
+}
