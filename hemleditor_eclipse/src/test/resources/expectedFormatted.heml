@@ -1,0 +1,160 @@
+{?set %xsd=defaultHEML.xsd %language=french %encoding=utf-8}
+{document
+    {section %other=tot %title=Toto1
+{! --this is a lua code.
+astre:open();
+local ret = {
+   {}
+}
+!}
+        {definitions %title=Sigles
+            {def %entry=Toto1# %%text toto1}
+            {def %entry=Toto2 %%text toto2}
+        }
+        {em italic %title=tptp}
+        {#plantml src=toto.log
+        class rata {
+        }
+        class blob {
+        }
+        
+        #{lol}
+        
+        class naboo {
+           attribute1: bool   
+           method1 void
+        }
+        
+        #}
+        {section %title=too1
+            {section %title=It is the foo
+                J'ecrit un test avec des {kw tes} et des test
+                pour voir ce {xref crossRref} qu'il faut avec.
+                    - list element1
+                    Content of list element1
+                    - list element2
+                    Content of list element2
+                    Text add
+            }
+            {section %title=Its foo things
+                    - List element1
+                    - List element2
+                    Patapouf
+            }
+            {section %title=Its foo things
+                    - List element1
+                    - List element2
+                Patapouf
+            }
+            {section %title=Its foo things
+                Plein de choses
+                    - List element1
+                Pas plein de choses
+                    - List element2
+                    Patapouf
+                Hein !!
+            }
+        }
+        {section %title=cao le grand
+            {section %title=Sub1
+                {section %title=Sub4 }
+                {#
+                @startuml
+                component comp1
+                component comp2
+                comp1 -> comp2
+                @enduml
+                #}
+            }
+            {code %language=lua
+{! --this is a lua code.
+astre:open();
+-- test newline
+
+local ret = {
+   {}
+}!}
+            }
+            {code %language=bash
+{! --this is a lua code.
+astre:open();
+local ret = {
+   {}
+}!}
+            }
+        }
+        {#un petit commentaire #}
+        {section %title=Nouvelle section
+            {section %title=Sub Section
+                {table
+                    {tr
+                        {th col1} {th col2} {th col3}
+                    }
+                    {?table
+                        val1 % val2 % val3
+                        val4 % val5 % val6
+                    }
+                    {tr {td col1Val} {td colVa2
+                            ColVla2 Suite} {td Col3Val}
+                    }
+                    {tr {td col1Val} {td
+                            colVa2
+                            ColVla2 Suite} {td Col3Val}
+                    }
+                }
+            }
+            {section %title=Response
+                {?table
+                }
+            }
+        }
+    }
+    {section %title=Section 2
+        {section %title=SubSection number 1}
+        {section %title=SubSection number 2
+            Test avec du texte ecrit ici
+            Vraiment proche du coté
+            {kw keyword}
+            {code %language=lua
+{!require "something";
+a+b!}
+            }
+            {p texte dans un paragraphe
+                sur plusieurs {kw superbe} lignes}
+            Suite du texte
+            Ttess
+            {p un autre paragraoh}
+            Fin du texte.
+        }
+        {section %title=SubSection number 3}
+        {section %title=SubSection number 4
+            Ceci est une sous section numero 4
+                - element1
+                - element2
+                the texte of the {a link} element
+                    - {p element21}
+                    {p one text in a p}
+                    the text of the element21
+                    -elemnt22
+                    the text of the element22
+                    is this texte :=)
+                    totototoo
+                    -element23
+                        -sousElement23
+                        {p another sub text
+                            in a sousElement}
+                        {p another paragraphe}
+                        - sousElement244
+                    -elements33
+                    - element3
+            a text after list
+            {p paragraphe after list, check if heml work well with that}
+                - sub
+                - sub2
+                    - sub3
+                a text after list
+                -SUB4
+        }
+        {?include %src=other.lua}
+    }
+}
