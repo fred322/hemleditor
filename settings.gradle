@@ -19,5 +19,5 @@ rootProject.name = 'HemlEditor'
 include ':hemleditor_eclipse'
 include ':hemleditor_vscode'
 
-project(':hemleditor_eclipse').projectDir = "$rootDir/../hemleditor_eclipse" as File
-project(':hemleditor_vscode').projectDir = "$rootDir/../hemleditor_vscode" as File
+project(':hemleditor_eclipse').projectDir = "$rootDir/hemleditor_eclipse" as File
+project(':hemleditor_vscode').projectDir = "$rootDir/hemleditor_vscode" as File

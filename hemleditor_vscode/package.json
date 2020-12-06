@@ -7,17 +7,23 @@
 		"vscode": "^1.51.0"
 	},
 	"categories": [
-		"Other"
+		"Programming Languages"
 	],
-	"activationEvents": [
-		"onCommand:hemleditor-vscode.helloWorld"
-	],
-	"main": "./out/extension.js",
 	"contributes": {
-		"commands": [
+		"languages": [
 			{
-				"command": "hemleditor-vscode.helloWorld",
-				"title": "Hello World"
+				"id": "heml",
+				"extensions": [
+					".heml"
+				],
+				"configuration": "./heml-language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "heml",
+				"scopeName": "source.heml",
+				"path": "./syntaxes/heml.tmLanguage.json"
 			}
 		]
 	},

@@ -1,0 +1,23 @@
+{
+    "comments": {
+        "blockComment": ["{#", "#}"]
+    },
+    "brackets": [
+        [
+            "{",
+            "}"
+        ]
+    ],
+    "autoClosingPairs": [
+        [
+            "{",
+            "}"
+        ]
+    ],
+    "folding": {
+        "markers": {
+            "start": "^\\s*//\\s*#?region\\b",
+            "end": "^\\s*//\\s*#?endregion\\n"
+        }
+    }
+}

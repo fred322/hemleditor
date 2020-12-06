@@ -1,0 +1,54 @@
+{
+    "scopeName": "source.heml",
+    "patterns": [
+        { "include": "#hemlComment" },
+        { "include": "#hemlTable" },
+        { "include": "#hemlCode" },
+        { "include": "#hemlEndText" },
+        { "include": "#hemlKeyword" },
+        { "include": "#hemlKey" }, 
+        { "include": "#hemlOptions"}, 
+        { "include": "#hemlEndKey" }
+    ],
+    "repository": {
+        "hemlKey": {
+            "match": "{[^\\s]+",
+            "name": "keyword"
+        },
+        "hemlEndKey": {
+            "match": "}",
+            "name": "keyword"
+        },
+        "hemlOptions": {
+            "match": "%[^\\s]+=",
+            "name": "variable.parameter"
+        },
+        "hemlComment": {
+            "begin": "{#",
+            "end": "#}",
+            "name": "comment"
+        },
+        "hemlTable": {
+            "begin": "{\\?",
+            "end": "}",
+            "name": "keyword.control"
+        },
+        "hemlCode": {
+            "name": "entity.name.type.class",
+            "begin": "{!",
+            "end": "!}"
+        },
+        "hemlEndText": {
+            "match": "%%[^}]+",
+            "name": "comment.line"
+        },
+        "hemlKeyword": {
+            "match": "{kw\\s[^}]+}",
+            "name": "keyword.control"
+        },
+        "italic": {
+            "match": "*.",
+            "name": "markup.italic"
+        }
+    }
+}
