@@ -3,6 +3,7 @@
 	"displayName": "hemleditor_vscode",
 	"description": "",
 	"version": "0.0.1",
+	"publisher": "FredSoftware",
 	"engines": {
 		"vscode": "^1.51.0"
 	},
