@@ -8,6 +8,6 @@ This extension highlight keywords and blocks in HEML files;
 
 ## Release Notes
 
-### 1.0.0
+### 0.0.1
 
 Initial release of HEML Editor for VSCode

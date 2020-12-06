@@ -1,6 +1,6 @@
 {
 	"name": "hemleditor-vscode",
-	"displayName": "hemleditor_vscode",
+	"displayName": "Heml Editor",
 	"description": "",
 	"version": "0.0.1",
 	"publisher": "FredSoftware",
@@ -10,6 +10,7 @@
 	"categories": [
 		"Programming Languages"
 	],
+	"icon": "images/hemlEditorLogo.png",
 	"contributes": {
 		"languages": [
 			{
